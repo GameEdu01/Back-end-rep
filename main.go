@@ -1,8 +1,8 @@
 package main
 
 import (
-	"EduApp/scripts"
 	"fmt"
+	"gited/EduApp/scripts"
 	"html/template"
 	"net/http"
 	"time"
@@ -25,16 +25,16 @@ func main() {
 		http.StripPrefix("/static/",
 			http.FileServer(http.Dir("static"))))
 
-	http.HandleFunc("/" , func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if dataRequested := r.FormValue("dataRequested"); dataRequested != "" {
-			requestFromFront.DataRequested = dataRequested;
+			requestFromFront.DataRequested = dataRequested
 		}
 		if dataPosted := r.FormValue("dataPosted"); dataPosted != "" {
-			requestFromFront.DataPosted = dataPosted;
+			requestFromFront.DataPosted = dataPosted
 		}
 
 		err := scripts.RouterUrls(requestFromFront.DataRequested, requestFromFront.DataPosted, requestFromFront.Time)
-		if err != nil{
+		if err != nil {
 			fmt.Println(err)
 		}
 		if err := templates.ExecuteTemplate(w, "template.html", requestFromFront); err != nil {
@@ -43,5 +43,5 @@ func main() {
 	})
 
 	fmt.Println("Listening on PORT 8080")
-	fmt.Println(http.ListenAndServe(":8080", nil));
+	fmt.Println(http.ListenAndServe(":8080", nil))
 }
