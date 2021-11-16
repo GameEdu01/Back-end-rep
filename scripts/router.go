@@ -5,7 +5,7 @@ import (
 )
 
 // RouterUrls executes script requested by request
-func RouterUrls(getUrl string, postUrl string, time string) error{
+func RouterUrls(getUrl string, postUrl string, time string) error {
 	switch reqUrl := getUrl; reqUrl {
 	case "test_get1":
 		fmt.Println("test_get1 is working properly")
