@@ -1,4 +1,4 @@
-package scripts
+package router
 
 import (
 	"fmt"

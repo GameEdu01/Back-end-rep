@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"gited/EduApp/scripts"
+	scripts "gited/EduApp/scripts"
 	"html/template"
 	"net/http"
 	"time"
