@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
 )
@@ -24,9 +26,15 @@ func newRouter() *mux.Router {
 }
 
 func main() {
+	port := os.Getenv("PORT")
+
+	if port == "" {
+		log.Fatal("$PORT must be set")
+	}
+
 	r := newRouter()
 	fmt.Println("hello i am started")
-	err := http.ListenAndServe(":8080", r)
+	err := http.ListenAndServe(fmt.Sprintf(":%s", port), r)
 	if err != nil {
 		fmt.Println("error", err)
 		return
