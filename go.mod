@@ -1,4 +1,4 @@
-module github.com/sohamkamani/birdpedia
+module eduapp
 
 go 1.16
 
