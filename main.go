@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
+	_ "github.com/heroku/x/hmetrics/onload"
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
