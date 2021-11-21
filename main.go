@@ -13,6 +13,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 func newRouter() *mux.Router {
 	r := mux.NewRouter()
+	fmt.Println("router created")
 	r.HandleFunc("/hello", handler).Methods("GET")
 	staticFileDirectory := http.Dir("./templates/")
 	staticFileHandler := http.StripPrefix("/assets/", http.FileServer(staticFileDirectory))
@@ -24,5 +25,6 @@ func newRouter() *mux.Router {
 
 func main() {
 	r := newRouter()
+	fmt.Println("hello i am started")
 	http.ListenAndServe(":8080", r)
 }
