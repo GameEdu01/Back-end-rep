@@ -20,7 +20,7 @@ func newRouter() *mux.Router {
 	r.HandleFunc("/hello", handler).Methods("GET")
 	staticFileDirectory := http.Dir("./templates/")
 	staticFileHandler := http.StripPrefix("/assets/", http.FileServer(staticFileDirectory))
-	r.PathPrefix("/assets/").Handler(staticFileHandler).Methods("GET")
+	r.PathPrefix("/assets").Handler(staticFileHandler).Methods("GET")
 	r.HandleFunc("/request", getHandler).Methods("GET")
 	r.HandleFunc("/request", createHandler).Methods("POST")
 	return r
