@@ -13,6 +13,7 @@ type req struct {
 
 var requests []req
 
+// getHandler
 func getHandler(w http.ResponseWriter, r *http.Request) {
 	reqListBytes, err := json.Marshal(requests)
 	if err != nil {
@@ -23,6 +24,7 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(reqListBytes)
 }
 
+// createHandler
 func createHandler(w http.ResponseWriter, r *http.Request) {
 	request := req{
 		Data:        "data",
