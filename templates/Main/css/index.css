@@ -1,0 +1,59 @@
+.background {
+  background-color: #171717;
+}
+
+.row {
+  padding-left: 680px;
+}
+
+#button_register {
+  padding-left: 145px;
+  padding-top: 50px;
+}
+
+#button_login {
+  padding-left: 150px;
+  padding-top: 50px;
+}
+
+.text {
+  color: #9D9D9D;
+  padding-left: 110px;
+  padding-top: 275px;
+  font-family: 'Righteous', cursive;
+}
+
+.text_login {
+  color: #9D9D9D;
+  padding-left: 130px;
+  padding-top: 275px;
+  font-family: 'Righteous', cursive;
+}
+
+#register_tab {
+  padding-bottom: 0px;
+}
+
+#passowrd {
+  font-family: 'Righteous', cursive;
+  color: #9D9D9D;
+}
+
+#email {
+  font-family: 'Righteous', cursive;
+  color: #9D9D9D;
+}
+
+#login_link {
+  font-family: 'Righteous', cursive;
+  color: #9D9D9D;
+  padding-left: 50px;
+  padding-bottom: 275px;
+}
+
+#signup_link {
+  font-family: 'Righteous', cursive;
+  color: #9D9D9D;
+  padding-left: 18px;
+  padding-bottom: 275px;
+}
