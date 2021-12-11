@@ -20,10 +20,19 @@ func newRouter() *mux.Router {
 	// Routers GET
 	r.HandleFunc("/register", scripts.RegisterUserPage).Methods("GET")
 	r.HandleFunc("/login", scripts.LoginUserPage).Methods("GET")
+	r.HandleFunc("/course", scripts.CoursePage).Methods("GET")
+	r.HandleFunc("/mycourses", scripts.UserCoursesPage).Methods("GET")
+	r.HandleFunc("/market", scripts.MarketPage).Methods("GET")
+	r.HandleFunc("/home", scripts.HomePage).Methods("GET")
 
 	//Routers POST
 	r.HandleFunc("/register", scripts.RegisterUser).Methods("POST")
 	r.HandleFunc("/login", scripts.LoginUser).Methods("POST")
+	r.HandleFunc("/course", scripts.CoursePost).Methods("POST")
+	r.HandleFunc("/mycourses", scripts.UserCoursesPost).Methods("POST")
+	r.HandleFunc("/market", scripts.MarketPost).Methods("POST")
+	r.HandleFunc("/home", scripts.HomePost).Methods("POST")
+
 	return r
 }
 
