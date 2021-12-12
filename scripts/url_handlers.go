@@ -1,15 +1,17 @@
 package scripts
 
 import (
+	"encoding/json"
 	"fmt"
 	uuid "github.com/google/uuid"
 	"html/template"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 )
 
-type login struct {
+type Login struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
@@ -35,7 +37,7 @@ func RegisterUserPage(w http.ResponseWriter, r *http.Request) {
 //LoginUserPage is responsible for sending login page to the front end
 func LoginUserPage(w http.ResponseWriter, r *http.Request) {
 	HomePageVars := PageVariables{}
-	t, err := template.ParseFiles("./templates/login.html")
+	t, err := template.ParseFiles("./templates/Login.html")
 	if err != nil { // if there is an error
 		log.Print("template parsing error: ", err) // log it
 	}
@@ -91,69 +93,57 @@ func UserCoursesPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//MarketPage ToDo
 func MarketPage(w http.ResponseWriter, r *http.Request) {
 
 }
 
+//HomePage Todo
 func HomePage(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// RegisterUser is responsible for getting user data from the front-end and saving to DB
-func RegisterUser(w http.ResponseWriter, r *http.Request) {
-	request := login{
-		Username: "username",
-		Password: "password",
-	}
-	err := r.ParseForm()
-	if err != nil {
-		fmt.Println(fmt.Errorf("Error: %v", err))
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	request.Username = r.Form.Get("username")
-	request.Password = r.Form.Get("password")
-
-	//Todo add user to db
-
-	fmt.Println(request.Username)
-	fmt.Println(request.Password)
-}
-
-// LoginUser is responsible for getting user data and changing state to loggined
-func LoginUser(w http.ResponseWriter, r *http.Request) {
-	request := login{
-		Username: "username",
-		Password: "password",
-	}
-	err := r.ParseForm()
-	if err != nil {
-		fmt.Println(fmt.Errorf("Error: %v", err))
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	request.Username = r.Form.Get("username")
-	request.Password = r.Form.Get("password")
-
-	//Todo find user in db
-
-	fmt.Println(request.Username)
-	fmt.Println(request.Password)
-}
-
+//CoursePost is responsible for getting and saving data about new posts
 func CoursePost(w http.ResponseWriter, r *http.Request) {
+	request := Course{
+		Id:             "id",
+		Author_id:      "author_id",
+		Price:          "price",
+		Owners:         "owners",
+		Game_name:      "game_name",
+		Followers:      "followers",
+		Course_content: "course_content",
+	}
+
+	fmt.Println(request)
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		fmt.Println(fmt.Errorf("Error: %v", err))
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
+	req := &Course{}
+	err = json.Unmarshal(body, req)
+	if err != nil {
+		fmt.Println(fmt.Errorf("Error: %v", err))
+	}
+	fmt.Printf("%+v\n", req)
+
+	//ToDo save to db
+
 }
 
+//UserCoursesPost is responsible for getting and saving updates about users courses
 func UserCoursesPost(w http.ResponseWriter, r *http.Request) {
 
 }
 
+//MarketPost ToDo
 func MarketPost(w http.ResponseWriter, r *http.Request) {
 
 }
 
+//HomePost ToDo
 func HomePost(w http.ResponseWriter, r *http.Request) {
 
 }

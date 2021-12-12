@@ -16,14 +16,13 @@ type User struct {
 }
 
 type Course struct {
-	id        string
-	author_id string
-	price     string
-	owners    string
-	game_name string
-
-	followers      string
-	course_content string
+	Id             string `json:"id"`
+	Author_id      string `json:"author_id"`
+	Price          string `json:"price"`
+	Owners         string `json:"owners"`
+	Game_name      string `json:"game_name"`
+	Followers      string `json:"followers"`
+	Course_content string `json:"course_content"`
 }
 
 func DbConnector() *sql.DB {
@@ -40,8 +39,8 @@ func DbConnector() *sql.DB {
 	return db
 }
 
-func GetLogins(db *sql.DB) []User {
-	rows, err := db.Query("SELECT username, password FROM logins")
+func GetLogin(db *sql.DB, username string, password string) []User {
+	rows, err := db.Query("SELECT username, password FROM logins WHERE username=$1 and password=$2", username, password)
 	if err != nil {
 		log.Fatalf("could not execute query: %v", err)
 	}
@@ -57,16 +56,21 @@ func GetLogins(db *sql.DB) []User {
 	fmt.Printf("found %d user: %+v", len(users), users)
 	fmt.Println()
 	return users
+
+}
+
+func CreateUserInDB(db *sql.DB, username string, password string) {
+	//ToDo
 }
 
 func GetCourseById(db *sql.DB, id uuid.UUID) Course {
 	row := db.QueryRow("SELECT * FROM courses WHERE id=$1", id)
 	course := Course{}
 	if err := row.Scan(
-		&course.id, &course.author_id,
-		&course.price, &course.game_name,
-		&course.followers, &course.course_content,
-		&course.owners,
+		&course.Id, &course.Author_id,
+		&course.Price, &course.Game_name,
+		&course.Followers, &course.Course_content,
+		&course.Owners,
 	); err != nil {
 		log.Fatalf("could not scan row: %v", err)
 	}
@@ -87,16 +91,16 @@ func GetCourseForUser(db *sql.DB, id uuid.UUID) []Course {
 	for rows.Next() {
 		course := Course{}
 		if err := rows.Scan(
-			&course.id, &course.author_id,
-			&course.price, &course.game_name,
-			&course.followers, &course.course_content,
-			&course.owners,
+			&course.Id, &course.Author_id,
+			&course.Price, &course.Game_name,
+			&course.Followers, &course.Course_content,
+			&course.Owners,
 		); err != nil {
 			log.Fatalf("could not scan row: %v", err)
 		}
 
 		fmt.Println(id.String())
-		if strings.Contains(course.owners, id.String()) {
+		if strings.Contains(course.Owners, id.String()) {
 			courses = append(courses, course)
 		}
 	}

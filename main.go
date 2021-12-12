@@ -7,7 +7,6 @@ import (
 	_ "github.com/heroku/x/hmetrics/onload"
 	"log"
 	"net/http"
-	"os"
 )
 
 func newRouter() *mux.Router {
@@ -26,8 +25,8 @@ func newRouter() *mux.Router {
 	r.HandleFunc("/home", scripts.HomePage).Methods("GET")
 
 	//Routers POST
-	r.HandleFunc("/register", scripts.RegisterUser).Methods("POST")
-	r.HandleFunc("/login", scripts.LoginUser).Methods("POST")
+	r.HandleFunc("/api/user/login", scripts.UserLogin).Methods("POST")
+	r.HandleFunc("/api/user/signup", scripts.UserSignup).Methods("POST")
 	r.HandleFunc("/course", scripts.CoursePost).Methods("POST")
 	r.HandleFunc("/mycourses", scripts.UserCoursesPost).Methods("POST")
 	r.HandleFunc("/market", scripts.MarketPost).Methods("POST")
@@ -37,7 +36,7 @@ func newRouter() *mux.Router {
 }
 
 func main() {
-	port := os.Getenv("PORT")
+	port := "8080"
 
 	if port == "" {
 		log.Fatal("$PORT must be set")
