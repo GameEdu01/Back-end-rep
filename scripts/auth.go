@@ -1,23 +1,20 @@
 package scripts
 
 import (
-	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
-	"time"
 )
 
 var SECRET_KEY = []byte("gosecretkey")
 
 type UserAuth struct {
-	Email    string `json:"email" bson:"email"`
-	Password string `json:"password" bson:"password"`
+	Username string `json:"email"`
+	Password string `json:"password"`
 }
 
 var client *mongo.Client
@@ -41,26 +38,23 @@ func GenerateJWT() (string, error) {
 }
 
 func UserSignup(response http.ResponseWriter, request *http.Request) {
-	initAuth()
 	response.Header().Set("Content-Type", "application/json")
 	var user UserAuth
 	json.NewDecoder(request.Body).Decode(&user)
 	user.Password = getHash([]byte(user.Password))
-	collection := client.Database("GODB").Collection("user")
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	result, _ := collection.InsertOne(ctx, user)
-	json.NewEncoder(response).Encode(result)
+
+	fmt.Println(user.Password, user.Username)
+	CreateUserInDB(user.Username, user.Password)
+
 }
 
 func UserLogin(response http.ResponseWriter, request *http.Request) {
-	initAuth()
 	response.Header().Set("Content-Type", "application/json")
 	var user UserAuth
 	var dbUser UserAuth
 	json.NewDecoder(request.Body).Decode(&user)
-	collection := client.Database("GODB").Collection("user")
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	err := collection.FindOne(ctx, bson.M{"email": user.Email}).Decode(&dbUser)
+
+	dbUser, err := GetLogin(user.Username, user.Password)
 
 	if err != nil {
 		response.WriteHeader(http.StatusInternalServerError)
@@ -84,13 +78,5 @@ func UserLogin(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 	response.Write([]byte(`{"token":"` + jwtToken + `"}`))
-
-}
-
-func initAuth() {
-	log.Println("Starting the auth")
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	//ToDo revrite to sqlDb
-	client, _ = mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
 
 }

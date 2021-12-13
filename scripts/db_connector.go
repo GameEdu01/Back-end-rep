@@ -39,28 +39,37 @@ func DbConnector() *sql.DB {
 	return db
 }
 
-func GetLogin(db *sql.DB, username string, password string) []User {
+func GetLogin(username string, password string) (UserAuth, error) {
+	db := DbConnector()
 	rows, err := db.Query("SELECT username, password FROM logins WHERE username=$1 and password=$2", username, password)
 	if err != nil {
-		log.Fatalf("could not execute query: %v", err)
+		return UserAuth{}, err
 	}
-	var users []User
+	var users UserAuth
 
 	for rows.Next() {
-		user := User{}
-		if err := rows.Scan(&user.username, &user.password); err != nil {
+		if err := rows.Scan(&users.Username, &users.Password); err != nil {
 			log.Fatalf("could not scan row: %v", err)
 		}
-		users = append(users, user)
+
 	}
-	fmt.Printf("found %d user: %+v", len(users), users)
+	fmt.Printf("found %d user: %+v", users)
 	fmt.Println()
-	return users
+	return users, nil
 
 }
 
-func CreateUserInDB(db *sql.DB, username string, password string) {
-	//ToDo
+func CreateUserInDB(username string, password string) {
+	db := DbConnector()
+	result, err := db.Exec("INSERT INTO logins (username, password) VALUES ($1, $2)", username, password)
+	if err != nil {
+		fmt.Errorf("Error: %v", err)
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		fmt.Errorf("Error: %v", err)
+	}
+	fmt.Println(id)
 }
 
 func GetCourseById(db *sql.DB, id uuid.UUID) Course {
