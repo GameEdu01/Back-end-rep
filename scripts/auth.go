@@ -10,12 +10,14 @@ import (
 	"net/http"
 )
 
-var SECRET_KEY = []byte("gosecretkey")
+var SECRET_KEY = []byte("gosecretkey") //ToDo generate secret key
 
 type UserAuth struct {
 	Username string `json:"email"`
 	Password string `json:"password"`
 }
+
+var generatedToken string
 
 var client *mongo.Client
 
@@ -40,12 +42,25 @@ func GenerateJWT() (string, error) {
 func UserSignup(response http.ResponseWriter, request *http.Request) {
 	response.Header().Set("Content-Type", "application/json")
 	var user UserAuth
+	var dbUser UserAuth
 	json.NewDecoder(request.Body).Decode(&user)
 	user.Password = getHash([]byte(user.Password))
 
 	fmt.Println(user.Password, user.Username)
-	CreateUserInDB(user.Username, user.Password)
 
+	dbUser, err := GetLogin(user.Username, user.Password)
+	if err != nil {
+		response.WriteHeader(http.StatusInternalServerError)
+		response.Write([]byte(`{"message":"` + err.Error() + `"}`))
+		return
+	}
+	if dbUser.Username == user.Username {
+		response.WriteHeader(http.StatusConflict)
+		response.Write([]byte((`{"message":"` + `trying to create existing user` + `"}"`)))
+		return
+	}
+	CreateUserInDB(user.Username, user.Password)
+	response.Write([]byte((`{"message":"` + `succesfully created user` + `"}"`)))
 }
 
 func UserLogin(response http.ResponseWriter, request *http.Request) {
@@ -78,5 +93,12 @@ func UserLogin(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 	response.Write([]byte(`{"token":"` + jwtToken + `"}`))
+	generatedToken = jwtToken
+}
 
+func VerifyTokens(authToken string) bool {
+	if authToken == generatedToken {
+		return true
+	}
+	return false
 }

@@ -41,7 +41,7 @@ func DbConnector() *sql.DB {
 
 func GetLogin(username string, password string) (UserAuth, error) {
 	db := DbConnector()
-	rows, err := db.Query("SELECT username, password FROM logins WHERE username=$1 and password=$2", username, password)
+	rows, err := db.Query("SELECT username, password FROM logins WHERE username=$1", username)
 	if err != nil {
 		return UserAuth{}, err
 	}

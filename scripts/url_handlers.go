@@ -49,6 +49,12 @@ func LoginUserPage(w http.ResponseWriter, r *http.Request) {
 
 //CoursePage is responsible for sending page with course content
 func CoursePage(w http.ResponseWriter, r *http.Request) {
+	authToken := r.Header.Get("authToken")
+	if !VerifyTokens(authToken) {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"message":"` + `incorect token` + `"}`))
+		return
+	}
 	b, err := io.ReadAll(r.Body)
 	if err != nil {
 		log.Print("request parsing error: ", err)
