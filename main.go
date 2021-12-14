@@ -20,7 +20,7 @@ func newRouter() *mux.Router {
 	r.HandleFunc("/register", scripts.RegisterUserPage).Methods("GET")
 	r.HandleFunc("/login", scripts.LoginUserPage).Methods("GET")
 	r.HandleFunc("/course", scripts.CoursePage).Methods("GET")         //login required
-	r.HandleFunc("/mycourses", scripts.UserCoursesPage).Methods("GET") //login  required
+	r.HandleFunc("/mycourses", scripts.UserCoursesPage).Methods("GET") //login required
 	r.HandleFunc("/market", scripts.MarketPage).Methods("GET")         //login required
 	r.HandleFunc("/home", scripts.HomePage).Methods("GET")             //login required
 

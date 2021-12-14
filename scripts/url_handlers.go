@@ -57,45 +57,70 @@ func CoursePage(w http.ResponseWriter, r *http.Request) {
 	}
 	b, err := io.ReadAll(r.Body)
 	if err != nil {
-		log.Print("request parsing error: ", err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(`{"message":"` + `unable to parse request` + `"}`))
+		return
 	}
 
 	id, err := uuid.Parse(string(b))
 	if err != nil {
-		log.Print("error parsing UUID ", err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(`{"message":"` + `error parsing UUID` + `"}`))
+		return
 	}
 	content := GetCourseById(DbConnector(), id)
 
 	t, err := template.ParseFiles("./templates/course.html")
-	if err != nil { // if there is an error
-		log.Print("template parsing error: ", err) // log it
+	if err != nil {
+		w.WriteHeader(http.StatusNoContent)
+		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		return
 	}
 	err = t.Execute(w, content)
-	if err != nil { // if there is an error
-		log.Print("template executing error: ", err) //log it
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		return
 	}
+	w.WriteHeader(http.StatusOK)
 }
 
 //UserCoursesPage is responsible for sending
 func UserCoursesPage(w http.ResponseWriter, r *http.Request) {
+	authToken := r.Header.Get("authToken")
+	if !VerifyTokens(authToken) {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"message":"` + `incorect token` + `"}`))
+		return
+	}
+
 	b, err := io.ReadAll(r.Body)
 	if err != nil {
-		log.Print("request parsing error: ", err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(`{"message":"` + `unable to parse request` + `"}`))
+		return
 	}
 
 	id, err := uuid.Parse(string(b))
 	if err != nil {
-		log.Print("error parsing UUID ", err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(`{"message":"` + `error parsing UUID` + `"}`))
+		return
 	}
+
 	content := GetCourseForUser(DbConnector(), id)
 
 	t, err := template.ParseFiles("./templates/course.html")
 	if err != nil { // if there is an error
-		log.Print("template parsing error: ", err) // log it
+		w.WriteHeader(http.StatusNoContent)
+		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		return
 	}
 	err = t.Execute(w, content)
-	if err != nil { // if there is an error
-		log.Print("template executing error: ", err) //log it
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		return
 	}
 }
 
@@ -111,6 +136,12 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 
 //CoursePost is responsible for getting and saving data about new posts
 func CoursePost(w http.ResponseWriter, r *http.Request) {
+	authToken := r.Header.Get("authToken")
+	if !VerifyTokens(authToken) {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"message":"` + `incorect token` + `"}`))
+		return
+	}
 	request := Course{
 		Id:             "id",
 		Author_id:      "author_id",
@@ -141,7 +172,14 @@ func CoursePost(w http.ResponseWriter, r *http.Request) {
 
 //UserCoursesPost is responsible for getting and saving updates about users courses
 func UserCoursesPost(w http.ResponseWriter, r *http.Request) {
+	authToken := r.Header.Get("authToken")
+	if !VerifyTokens(authToken) {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"message":"` + `incorect token` + `"}`))
+		return
+	}
 
+	//ToDo
 }
 
 //MarketPost ToDo
