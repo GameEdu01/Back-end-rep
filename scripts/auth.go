@@ -29,6 +29,22 @@ func getHash(pwd []byte) string {
 	return string(hash)
 }
 
+func GetIdByLogin(username string) (int, error) {
+	db := DbConnector()
+	rows, err := db.Query("SELECT id, username FROM logins WHERE username=$1", username)
+	if err != nil {
+		return 0, err
+	}
+
+	var id int
+	for rows.Next() {
+		if err := rows.Scan(&id, &username); err != nil {
+			log.Fatalf("could not scan row: %v", err)
+		}
+	}
+	return id, nil
+}
+
 func GenerateJWT() (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	tokenString, err := token.SignedString(SECRET_KEY)

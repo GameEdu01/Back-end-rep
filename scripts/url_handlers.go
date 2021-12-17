@@ -7,8 +7,8 @@ import (
 	"html/template"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
+	"strconv"
 )
 
 type Login struct {
@@ -26,11 +26,15 @@ func RegisterUserPage(w http.ResponseWriter, r *http.Request) {
 	HomePageVars := PageVariables{}
 	t, err := template.ParseFiles("./templates/register.html")
 	if err != nil { // if there is an error
-		log.Print("template parsing error: ", err) // log it
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		return
 	}
 	err = t.Execute(w, HomePageVars)
 	if err != nil { // if there is an error
-		log.Print("template executing error: ", err) //log it
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		return
 	}
 }
 
@@ -39,11 +43,15 @@ func LoginUserPage(w http.ResponseWriter, r *http.Request) {
 	HomePageVars := PageVariables{}
 	t, err := template.ParseFiles("./templates/Login.html")
 	if err != nil { // if there is an error
-		log.Print("template parsing error: ", err) // log it
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		return
 	}
 	err = t.Execute(w, HomePageVars)
 	if err != nil { // if there is an error
-		log.Print("template executing error: ", err) //log it
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		return
 	}
 }
 
@@ -101,7 +109,7 @@ func UserCoursesPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := uuid.Parse(string(b))
+	id, err := strconv.Atoi(string(b))
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(`{"message":"` + `error parsing UUID` + `"}`))
@@ -142,32 +150,31 @@ func CoursePost(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"message":"` + `incorect token` + `"}`))
 		return
 	}
-	request := Course{
-		Id:             "id",
-		Author_id:      "author_id",
-		Price:          "price",
-		Owners:         "owners",
-		Game_name:      "game_name",
-		Followers:      "followers",
-		Course_content: "course_content",
-	}
 
-	fmt.Println(request)
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		fmt.Println(fmt.Errorf("Error: %v", err))
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(`{"message":"` + `error parsing request` + `"}`))
+		return
 	}
 
-	req := &Course{}
+	req := &RequestCourse{}
 	err = json.Unmarshal(body, req)
 	if err != nil {
-		fmt.Println(fmt.Errorf("Error: %v", err))
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(`{"message":"` + `error parsing request` + `"}`))
+		return
 	}
 	fmt.Printf("%+v\n", req)
-
-	//ToDo save to db
-
+	id, err := GetIdByLogin(r.Header.Get("username"))
+	if err != nil {
+		w.WriteHeader(http.StatusConflict)
+		w.Write([]byte(`{"message":"` + `unable to find user in db` + `"}`))
+	}
+	fmt.Print(id)
+	PostCourse(DbConnector(), req, id)
+	return
 }
 
 //UserCoursesPost is responsible for getting and saving updates about users courses

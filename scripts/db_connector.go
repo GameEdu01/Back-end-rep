@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"log"
-	"strings"
+	"strconv"
 )
 
 type User struct {
@@ -15,14 +15,24 @@ type User struct {
 	password string
 }
 
+type Content struct {
+	Request string `json:"request"`
+}
+
 type Course struct {
-	Id             string `json:"id"`
-	Author_id      string `json:"author_id"`
-	Price          string `json:"price"`
-	Owners         string `json:"owners"`
-	Game_name      string `json:"game_name"`
-	Followers      string `json:"followers"`
-	Course_content string `json:"course_content"`
+	Id             int     `json:"id"`
+	Author_id      int     `json:"author_id"`
+	Price          float64 `json:"price"`
+	Owners         []int   `json:"owners"`
+	Game_name      string  `json:"game_name"`
+	Followers      int     `json:"followers"`
+	Course_content Content `json:"course_content"`
+}
+
+type RequestCourse struct {
+	Price          string  `json:"price"`
+	Game_name      string  `json:"game_name"`
+	Course_content Content `json:"course_content"`
 }
 
 func DbConnector() *sql.DB {
@@ -89,7 +99,7 @@ func GetCourseById(db *sql.DB, id uuid.UUID) Course {
 	return course
 }
 
-func GetCourseForUser(db *sql.DB, id uuid.UUID) []Course {
+func GetCourseForUser(db *sql.DB, id int) []Course {
 	rows, err := db.Query("SELECT * FROM courses")
 	if err != nil {
 		log.Fatalf("could not execute query: %v", err)
@@ -108,11 +118,41 @@ func GetCourseForUser(db *sql.DB, id uuid.UUID) []Course {
 			log.Fatalf("could not scan row: %v", err)
 		}
 
-		fmt.Println(id.String())
-		if strings.Contains(course.Owners, id.String()) {
-			courses = append(courses, course)
+		fmt.Println(id)
+		for i := 0; i < len(course.Owners); i++ {
+			if course.Owners[i] == id {
+				courses = append(courses, course)
+			}
 		}
+
 	}
 	fmt.Print(courses)
 	return courses
+}
+
+func PostCourse(db *sql.DB, CoursePosted *RequestCourse, CourseId int) {
+	PriceFloat, err := strconv.ParseFloat(CoursePosted.Price, 64)
+	if err != nil {
+		fmt.Errorf("could not parse price", err)
+	}
+	var Owners []int
+	Owners = append(Owners, CourseId)
+
+	var SaveCourse Course
+	SaveCourse.Course_content = CoursePosted.Course_content
+	SaveCourse.Game_name = CoursePosted.Game_name
+	SaveCourse.Price = PriceFloat
+	SaveCourse.Author_id = CourseId
+	SaveCourse.Followers = 0
+	SaveCourse.Owners = Owners
+
+	result, err := db.Exec("INSERT INTO courses (author_id, price, game_name, followers, course_content, owners) VALUES ($1, $2, $3, $4, $5, $6)", SaveCourse.Author_id, SaveCourse.Price, SaveCourse.Game_name, SaveCourse.Followers, SaveCourse.Course_content, SaveCourse.Owners)
+	if err != nil {
+		fmt.Errorf("Error: %v", err)
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		fmt.Errorf("Error: %v", err)
+	}
+	fmt.Println(id)
 }
