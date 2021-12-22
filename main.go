@@ -7,6 +7,7 @@ import (
 	_ "github.com/heroku/x/hmetrics/onload"
 	"log"
 	"net/http"
+	"os"
 )
 
 func newRouter() *mux.Router {
