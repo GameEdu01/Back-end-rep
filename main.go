@@ -17,6 +17,7 @@ func newRouter() *mux.Router {
 	r.PathPrefix("/assets").Handler(staticFileHandler).Methods("GET")
 
 	// Routers GET
+
 	r.HandleFunc("/register", scripts.RegisterUserPage).Methods("GET")
 	r.HandleFunc("/login", scripts.LoginUserPage).Methods("GET")
 	r.HandleFunc("/course", scripts.CoursePage).Methods("GET")         //login required

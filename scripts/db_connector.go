@@ -156,3 +156,31 @@ func PostCourse(db *sql.DB, CoursePosted *RequestCourse, CourseId int) {
 	}
 	fmt.Println(id)
 }
+
+func GetMarketForUser(db *sql.DB, id int) []Course {
+	rows, err := db.Query("SELECT * FROM courses")
+	if err != nil {
+		log.Fatalf("could not execute query: %v", err)
+	}
+
+	var courses []Course
+
+	for rows.Next() {
+		course := Course{}
+		if err := rows.Scan(
+			&course.Id, &course.Author_id,
+			&course.Price, &course.Game_name,
+			&course.Followers, &course.Course_content,
+			&course.Owners,
+		); err != nil {
+			log.Fatalf("could not scan row: %v", err)
+		}
+
+		fmt.Println(id)
+
+		//ToDo selecting courses for user
+
+	}
+	fmt.Print(courses)
+	return courses
+}
