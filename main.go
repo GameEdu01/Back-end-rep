@@ -7,6 +7,7 @@ import (
 	_ "github.com/heroku/x/hmetrics/onload"
 	"log"
 	"net/http"
+	"os"
 )
 
 func newRouter() *mux.Router {
@@ -37,7 +38,7 @@ func newRouter() *mux.Router {
 }
 
 func main() {
-	port := "8080"
+	port := os.Getenv("PORT")
 
 	if port == "" {
 		log.Fatal("$PORT must be set")
