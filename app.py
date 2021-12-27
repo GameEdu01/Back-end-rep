@@ -223,3 +223,5 @@ def signup(signup: SignUp):
 # If even after all you saw here you still don't want to integrate whole api into fastapi, please make your
 # own documentation (and again, FastAPI makes it automatically), or just explain me a bit more about 
 # your api, so it's easier for me to understand how to work with it 
+
+# UPDATE: nope, i am rewritng all of it with fastapi anyway :D
