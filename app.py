@@ -145,7 +145,7 @@ def signup(signup: SignUp):
         return {"message": "Password can not contain spaces"}
 
     userExists = dbc.user_exists("users", signup.username)
-    emailExists = dbc.user_exists("users", signup.username)
+    emailExists = dbc.email_exists("users", signup.email)
     if userExists or emailExists:
         return {"message": "This username or email already exists!"}
 
