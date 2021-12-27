@@ -5,8 +5,6 @@ from pydantic import BaseModel
 import psycopg as pg
 from cryptography.fernet import Fernet
 import requests
-from requests.exceptions import ReadTimeout
-import random
 
 
 key = b'yURsNoRMdtDMy8QUj-05B64K-5cvNaJ-VNxvQZOu154=' # Key used to encrypt secrets, will be hidden in the .env in future
@@ -27,7 +25,8 @@ class DBConnector: # Connetion to the database class
 
         self.queries = {"get_table": ["SELECT * FROM ", " ORDER BY id"],
                         "username_exists": ["SELECT EXISTS(SELECT 1 FROM ", " WHERE username = '", "')"],
-                        "email_exists": ["SELECT EXISTS(SELECT 1 FROM ", " WHERE email = '", "')"]}
+                        "email_exists": ["SELECT EXISTS(SELECT 1 FROM ", " WHERE email = '", "')"],
+                        "get_columns": ["SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = '", "'"]}
         
     def connect(self): # getting the connection
 
@@ -50,8 +49,16 @@ class DBConnector: # Connetion to the database class
         self.cursor.execute(query)
         records = self.cursor.fetchall()
 
+        query = self.queries["get_columns"][0] + tableName + self.queries["get_columns"][1]
+
+        self.cursor.execute(query)
+        columns = self.cursor.fetchall()
+
         for row in records:
-            logins.append({"id": row[0], "username": row[1], "password": row[2]})
+            rowJson = {}
+            for i in range(len(row)):
+                rowJson[str(columns[i][0])] = (row[i])
+            logins.append(rowJson)
 
         return logins
 
