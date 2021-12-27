@@ -160,3 +160,9 @@ def signup(signup: SignUp):
 
     return {"message": f"{signup.username} was added to database",
             "token": token}
+
+
+# If you want to run this script localy on your machine:
+# uvicorn app:app --reload      
+
+#Then go into http://127.0.0.1:800/docs and you'll see the documentation
