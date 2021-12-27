@@ -132,7 +132,7 @@ def login(login: Login):
 
     return {"message": "There was an error login in, %s".format(request.status_code)}
 
-# I created new "users" database for the signup function, i hope you like it so we can keep it for now
+# I created new "users" table for the signup function, i hope you like it so we can keep it for now
 
 @app.post("/fastapi/signup") # Signing up, all secrity measures are in there, basic syntax check is also included
 def signup(signup: SignUp):
