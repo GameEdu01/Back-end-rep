@@ -13,7 +13,7 @@ import (
 var SECRET_KEY = []byte("gosecretkey") //ToDo generate secret key
 
 type UserAuth struct {
-	Username string `json:"email"`
+	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
@@ -110,6 +110,7 @@ func UserLogin(response http.ResponseWriter, request *http.Request) {
 	}
 	response.Write([]byte(`{"token":"` + jwtToken + `"}`))
 	generatedToken = jwtToken
+	return
 }
 
 func VerifyTokens(authToken string) bool {

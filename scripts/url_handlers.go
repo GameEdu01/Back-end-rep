@@ -40,18 +40,27 @@ func RegisterUserPage(w http.ResponseWriter, r *http.Request) {
 
 //LoginUserPage is responsible for sending login page to the front end
 func LoginUserPage(w http.ResponseWriter, r *http.Request) {
-	HomePageVars := PageVariables{}
-	t, err := template.ParseFiles("./templates/Login.html")
-	if err != nil { // if there is an error
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+	err := r.ParseForm()
+	if err != nil {
 		return
 	}
-	err = t.Execute(w, HomePageVars)
-	if err != nil { // if there is an error
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
-		return
+	if r.Method == "GET" {
+		t, err := template.ParseFiles("templates/login.html")
+		if err != nil { // if there is an error
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+			return
+		}
+		t.Execute(w, nil)
+		if err != nil { // if there is an error
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+			return
+		} else {
+			username := r.Form["username"]
+			password := r.Form["password"]
+			fmt.Fprintf(w, "username = %s, password = %s", username, password)
+		}
 	}
 }
 
@@ -132,9 +141,39 @@ func UserCoursesPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//MarketPage ToDo
+//MarketPage responsible for giving courses for user to sell
 func MarketPage(w http.ResponseWriter, r *http.Request) {
-
+	authToken := r.Header.Get("authToken")
+	if !VerifyTokens(authToken) {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"message":"` + `incorect token` + `"}`))
+		return
+	}
+	t, err := template.ParseFiles("./templates/course.html")
+	if err != nil { // if there is an error
+		w.WriteHeader(http.StatusNoContent)
+		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		return
+	}
+	b, err := io.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(`{"message":"` + `unable to parse request` + `"}`))
+		return
+	}
+	id, err := strconv.Atoi(string(b))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(`{"message":"` + `error parsing UUID` + `"}`))
+		return
+	}
+	content := GetMarketForUser(DbConnector(), id)
+	err = t.Execute(w, content)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		return
+	}
 }
 
 //HomePage Todo
