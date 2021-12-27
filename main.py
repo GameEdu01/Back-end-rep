@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 import psycopg as pg
 
-
+# testing
 class DBConnector:
 
     def __init__(self, dbname, user, password, address):
