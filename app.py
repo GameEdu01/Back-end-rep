@@ -1,6 +1,7 @@
 from cryptography import fernet # importing all the external packages
 from fastapi import FastAPI
 from fastapi.param_functions import Query
+from psycopg import sql
 from pydantic import BaseModel
 import psycopg as pg
 from cryptography.fernet import Fernet
@@ -24,9 +25,9 @@ class DBConnector: # Connetion to the database class
         self.cursor = self.conn.cursor()
 
         self.queries = {"get_table": ["SELECT * FROM ", " ORDER BY id"],
-                        "username_exists": ["SELECT EXISTS(SELECT 1 FROM ", " WHERE username = '", "')"],
-                        "email_exists": ["SELECT EXISTS(SELECT 1 FROM ", " WHERE email = '", "')"],
-                        "get_columns": ["SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = '", "'"]}
+                        "value_exists": ["SELECT EXISTS(SELECT 1 FROM ", " WHERE ", " = '", "')"],
+                        "get_columns": ["SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = '", "'"],
+                        "get_user": ["SELECT * FROM users WHERE username = '", "'"]}
         
     def connect(self): # getting the connection
 
@@ -44,12 +45,14 @@ class DBConnector: # Connetion to the database class
         
         logins = []
 
-        query = self.queries["get_table"][0] + tableName + self.queries["get_table"][1]
+        queryRequestList = self.queries["get_table"]
+        query = queryRequestList[0] + tableName + queryRequestList[1]
         
         self.cursor.execute(query)
         records = self.cursor.fetchall()
 
-        query = self.queries["get_columns"][0] + tableName + self.queries["get_columns"][1]
+        queryRequestList = self.queries["get_columns"]
+        query = queryRequestList[0] + tableName + queryRequestList[1]
 
         self.cursor.execute(query)
         columns = self.cursor.fetchall()
@@ -62,32 +65,41 @@ class DBConnector: # Connetion to the database class
 
         return logins
 
-    def user_exists(self, tableName, username): # check if username exist in certain database
+    def value_exists(self, tableName, value, key): # check if value exist in certain place
 
-        userExists = False
+        valueExists = False
 
-        query = self.queries["username_exists"][0] + tableName + self.queries["username_exists"][1] + username + self.queries["username_exists"][2]
-
-        self.cursor.execute(query)
-
-        userExists = self.cursor.fetchall()[0][0]
-
-        return userExists
-
-    def email_exists(self, tableName, email): # check if email exist in certain database
-
-        emailExists = False
-
-        query = self.queries["email_exists"][0] + tableName + self.queries["email_exists"][1] + email + self.queries["email_exists"][2]
+        queryRequestList = self.queries["value_exists"]
+        query = queryRequestList[0] + tableName + queryRequestList[1] + key + queryRequestList[2] + value + queryRequestList[3]
 
         self.cursor.execute(query)
+        valueExists = self.cursor.fetchall()[0][0]
 
-        emailExists = self.cursor.fetchall()[0][0]
+        return valueExists
 
-        return emailExists
+    def get_user_data(self, username): # get user from users by it's username
+
+        queryRequestList = self.queries["get_user"]
+        query = queryRequestList[0] + username + queryRequestList[1]
+
+        self.cursor.execute(query)
+        userData = self.cursor.fetchall()[0]
+        userDataJson = {}
+
+        queryRequestList = self.queries["get_columns"]
+        query = queryRequestList[0] + "users" + queryRequestList[1]
+
+        self.cursor.execute(query)
+        columns = self.cursor.fetchall()
+
+        for i in range(len(userData)):
+            userDataJson[str(columns[i][0])] = userData[i]
+
+        return userDataJson
 
 
 # NOTE i am planning to make a single function instead of user_exists() and email_exists()
+# PS DONE
 
 
 class APIConnecter: # Requests to already existing api class, but i think everything should've been written in the fastapi
@@ -118,13 +130,31 @@ class SignUp(BaseModel): # SignUp basic model
     email: str
 
 
+class GetUser(BaseModel):
+    username: str
+    password: str
+
+
 @app.get("/fastapi/") # Hello world!
 def get_root(): 
     return {"Hello": "World!"}
 
 
 @app.post("/fastapi/table") # get table from the database by it's name
-def get_table(table_name: str):
+def get_table(table_name: str, getuser: GetUser):
+    
+    if not dbc.value_exists("users", getuser.username, "username"):
+        return {"message": "This user does not exist"}
+
+    user = dbc.get_user_data(getuser.username)
+    
+    if not user:
+        return {"message": "Incorrect username or password"}
+    if not fernet.decrypt(user["password"].encode()).decode() == getuser.password:
+        return {"message": "Incorrect username or password"}
+    if not user["is_superuser"]:
+        return {"message": "This user is not a superuser, so he can't access it"}
+
     return dbc.get_table(table_name)
 
 
@@ -141,8 +171,24 @@ def login(login: Login):
 
 # I created new "users" table for the signup function, i hope you like it so we can keep it for now
 
+@app.post("/fastapi/get_user")  # TODO make a demo of gettting user without password and email
+def get_user(getuser: GetUser): # get user, you must know the password in order to access it
+
+    if not dbc.value_exists("users", getuser.username, "username"):
+        return {"message": "This user does not exist"}
+
+    user = dbc.get_user_data(getuser.username)
+    
+    if not user:
+        return {"message": "Incorrect username or password"}
+    if not fernet.decrypt(user["password"].encode()).decode() == getuser.password:
+        return {"message": "Incorrect username or password"}
+
+    return {getuser.username: user}
+
+
 @app.post("/fastapi/signup") # Signing up, all secrity measures are in there, basic syntax check is also included
-def signup(signup: SignUp):
+def signup(signup: SignUp): 
 
     if " " in signup.email or not "@" in signup.email:
         return {"message": "Please use an appropriate email address"}
@@ -151,8 +197,8 @@ def signup(signup: SignUp):
     if " " in signup.password:
         return {"message": "Password can not contain spaces"}
 
-    userExists = dbc.user_exists("users", signup.username)
-    emailExists = dbc.email_exists("users", signup.email)
+    userExists = dbc.value_exists("users", signup.username, "username")
+    emailExists = dbc.value_exists("users", signup.email, "email")
     if userExists or emailExists:
         return {"message": "This username or email already exists!"}
 
@@ -160,8 +206,8 @@ def signup(signup: SignUp):
 
     token = Fernet.generate_key().decode()
 
-    dbc.cursor.execute("""INSERT INTO users (username, password, email, token)
-                            VALUES ('{}', '{}', '{}', '{}')""".format(signup.username, signup.password, signup.email, token))
+    dbc.cursor.execute("""INSERT INTO users (username, password, email, token, is_superuser)
+                            VALUES ('{}', '{}', '{}', '{}', false)""".format(signup.username, signup.password, signup.email, token))
 
     dbc.conn.commit()
 
