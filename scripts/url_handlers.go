@@ -3,12 +3,13 @@ package scripts
 import (
 	"encoding/json"
 	"fmt"
-	uuid "github.com/google/uuid"
 	"html/template"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"strconv"
+
+	uuid "github.com/google/uuid"
 )
 
 type Login struct {
@@ -30,6 +31,7 @@ func RegisterUserPage(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
 		return
 	}
+
 	err = t.Execute(w, HomePageVars)
 	if err != nil { // if there is an error
 		w.WriteHeader(http.StatusInternalServerError)
@@ -133,6 +135,7 @@ func UserCoursesPage(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
 		return
 	}
+
 	err = t.Execute(w, content)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
