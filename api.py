@@ -3,13 +3,45 @@ from fastapi import FastAPI
 from fastapi.param_functions import Query
 from psycopg import sql
 from pydantic import BaseModel
-import psycopg as pg
 from cryptography.fernet import Fernet
+import psycopg as pg
 import requests
+import random
+import string
+import json
+import time
 
 
 key = b'yURsNoRMdtDMy8QUj-05B64K-5cvNaJ-VNxvQZOu154=' # Key used to encrypt secrets, will be hidden in the .env in future
 fernet = Fernet(key)
+      
+
+class Config:
+
+    def __init__(self, dir):
+        
+        self.configDir = dir
+
+        self.configData = {}
+        with open(dir, 'r') as file:
+            self.configData = json.load(file)
+
+
+class Secret:
+
+    def get_secret(lenght, start):
+
+        secret = start
+        for i in range(lenght):
+            if not i == 0 and not i == lenght-1:
+                if random.randint(1, 6) == 1:
+                    secret += "."
+                    continue
+            secret += random.choice(string.ascii_letters)
+
+        dt = time.time()
+
+        return secret, dt
 
 
 class DBConnector: # Connetion to the database class
@@ -111,6 +143,7 @@ class APIConnecter: # Requests to already existing api class, but i think everyt
         self.postLocations = {"login": "api/user/login"}
 
 
+config = Config("config.json")
 app = FastAPI()
 apic = APIConnecter(r"https://gameedu.herokuapp.com/")
 dbc = DBConnector(dbname="d2d1ljqhqhl34q",
@@ -135,12 +168,18 @@ class GetUser(BaseModel):
     password: str
 
 
-@app.get("/fastapi/") # Hello world!
+class AdminUserRequest(BaseModel):
+    username: str
+    password: str
+    user_username: str
+
+
+@app.post("/fastapi/") # Hello world!
 def get_root(): 
     return {"Hello": "World!"}
 
 
-@app.post("/fastapi/table") # get table from the database by it's name
+@app.post("/api/table") # get table from the database by it's name
 def get_table(table_name: str, getuser: GetUser):
     
     if not dbc.value_exists("users", getuser.username, "username"):
@@ -157,8 +196,29 @@ def get_table(table_name: str, getuser: GetUser):
 
     return dbc.get_table(table_name)
 
+@app.post("/api/get_user_with_admin")
+def get_user_with_admin(aur: AdminUserRequest):
 
-@app.post("/fastapi/login_with_go") # Login with Igor's go api, not synced with the rest of fastapi i wrote (takes a lot of time to run)
+    if not dbc.value_exists("users", aur.username, "username"):
+        return {"message": "This admin user does not exist"}
+
+    user = dbc.get_user_data(aur.username)
+    
+    if not user:
+        return {"message": "Incorrect admin username or password"}
+    if not fernet.decrypt(user["password"].encode()).decode() == aur.password:
+        return {"message": "Incorrect admin username or password"}
+    if not user["is_superuser"]:
+        return {"message": "You don't have access to this request!"} 
+
+    if not dbc.value_exists("users", aur.user_username, "username"):
+        return {"message": "This user does not exist"}
+
+    user = dbc.get_user_data(aur.user_username)
+
+    return {aur.user_username: user}
+
+@app.post("/api/login_with_go") # Login with Igor's go api, not synced with the rest of fastapi i wrote (takes a lot of time to run)
 def login(login: Login):
 
     request = requests.post(apic.address + apic.postLocations["login"],
@@ -171,7 +231,7 @@ def login(login: Login):
 
 # I created new "users" table for the signup function, i hope you like it so we can keep it for now
 
-@app.post("/fastapi/get_user")  # TODO make a demo of gettting user without password and email
+@app.post("/api/get_user")  # TODO make a demo of gettting user without password and email
 def get_user(getuser: GetUser): # get user, you must know the password in order to access it
 
     if not dbc.value_exists("users", getuser.username, "username"):
@@ -187,7 +247,23 @@ def get_user(getuser: GetUser): # get user, you must know the password in order 
     return {getuser.username: user}
 
 
-@app.post("/fastapi/signup") # Signing up, all secrity measures are in there, basic syntax check is also included
+@app.post("/api/get_user_demo")
+def get_user_demo(username: str):
+
+    if not dbc.value_exists("users", username, "username"):
+        return {"message": "This user does not exist"}
+
+    user = dbc.get_user_data(username)
+
+    del user["password"]
+    del user["token"]
+    del user["session"]
+    del user["session_expire"]
+
+    return {username: user}
+
+
+@app.post("/api/signup") # Signing up, all secrity measures are in there, basic syntax check is also included
 def signup(signup: SignUp): 
 
     if " " in signup.email or not "@" in signup.email:
@@ -204,19 +280,20 @@ def signup(signup: SignUp):
 
     signup.password = fernet.encrypt(signup.password.encode()).decode()
 
-    token = Fernet.generate_key().decode()
+    token, _ = Secret.get_secret(60, "TTT")
+    session, time_created = Secret.get_secret(30, "")
 
-    dbc.cursor.execute("""INSERT INTO users (username, password, email, token, is_superuser)
-                            VALUES ('{}', '{}', '{}', '{}', false)""".format(signup.username, signup.password, signup.email, token))
+    dbc.cursor.execute("""INSERT INTO users (username, password, email, token, is_superuser, session, session_expire)
+        VALUES ('{}', '{}', '{}', '{}', false, '{}', {})""".format(signup.username, signup.password, signup.email, token, session, time_created + config.configData["session_lenght"]))
 
-    dbc.conn.commit()
+    dbc.conn.commit() # Session expire is a time.time() object, i think it's easier to work with it
 
     return {"message": f"{signup.username} was added to database",
             "token": token}
 
 
 # If you want to run this script localy on your machine:
-# uvicorn app:app --reload      
+# uvicorn api:app --reload      
 
 # Then go into http://127.0.0.1:800/docs and you'll see the documentation
 
