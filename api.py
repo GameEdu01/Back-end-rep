@@ -377,7 +377,7 @@ def get_user_demo(username: str):
     return {username: user}
 
 
-@app.post("/api/signup") # Signing up, all secrity measures are in there, basic syntax check is also included
+@app.post("/api/signup") # basic syntax check 
 def signup(signup: SignUp): 
 
     if " " in signup.email or not "@" in signup.email:
