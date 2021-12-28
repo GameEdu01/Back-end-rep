@@ -411,6 +411,9 @@ def signup(signup: SignUp):
 # before running, use 
 # pip install -r requirements.txt
 
+# YOU MUST PULL WHOLE fastApi BRANCH IN ORDER FOR THIS TO WORK
+# Because i use other files with this script
+
 # If you want to run this script localy on your machine:
 # uvicorn api:app --reload      
 
