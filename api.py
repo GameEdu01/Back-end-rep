@@ -415,9 +415,3 @@ def signup(signup: SignUp):
 # uvicorn api:app --reload      
 
 # Then go into http://127.0.0.1:8000/docs and you'll see the documentation
-
-# If even after all you saw here you still don't want to integrate whole api into fastapi, please make your
-# own documentation (and again, FastAPI makes it automatically), or just explain me a bit more about 
-# your api, so it's easier for me to understand how to work with it 
-
-# UPDATE: nope, i am rewritng all of it with fastapi anyway :D
