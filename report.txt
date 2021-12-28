@@ -1,0 +1,40 @@
+So here ill explain you basic requests in my api
+---------------------------------------------------------
+
+We start with that, we want to sign up
+To do that, we use /api/signup as a post request
+
+{
+  "username": "string",
+  "password": "string",
+  "email": "string"
+}
+
+If in return we get our token and congrats message, then we have
+sucessfully added ourselfes to the database
+
+When user is created, it is automatically is_active by default,
+but after certain amount of time our session expires, and only way
+to access data (only ours for now), is to make a new session, this
+can be avoided by making basic request and using /api/update_session_expire_date
+
+{
+  "username": "string",
+  "password": "string"
+}
+
+But if it happenes that we don't use any of those in a long period of time,
+our session gets completely expired and we can not update it now, and the only 
+way to continue using our account is to create a new session with /api/new_session
+
+{
+  "username": "string",
+  "session": "string"
+}
+
+this request would NOT work if you already have a working session in your account
+
+after you use /api/new_session, you automatically is_acitve = true, and there is no 
+need to use /api/set_user_active_with_session in order to access data
+
+
