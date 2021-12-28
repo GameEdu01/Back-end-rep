@@ -408,6 +408,9 @@ def signup(signup: SignUp):
             "token": token}
 
 
+# before running, use 
+# pip install -r requirements.txt
+
 # If you want to run this script localy on your machine:
 # uvicorn api:app --reload      
 
