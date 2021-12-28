@@ -38,3 +38,5 @@ after you use /api/new_session, you automatically is_acitve = true, and there is
 need to use /api/set_user_active_with_session in order to access data
 
 
+There are much more api requests i made, but those are the most basic ones
+

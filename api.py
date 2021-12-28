@@ -1,8 +1,7 @@
 from typing import Optional
 from cryptography import fernet # importing all the external packages
 from fastapi import FastAPI
-from fastapi.param_functions import Query
-from psycopg import sql
+import fastapi
 from pydantic import BaseModel
 from cryptography.fernet import Fernet
 import psycopg as pg
@@ -162,6 +161,28 @@ class DBConnector: # Connetion to the database class
 
         return True
 
+    def change_nickname(self, username, nickname):
+
+        self.cursor.execute("UPDATE users SET nickname = '{}' WHERE username = '{}'".format(nickname, username))
+        self.conn.commit()
+
+        return True
+
+    def check_spelling(self, message):
+
+        is_ok = True
+
+        if message == "":
+            is_ok = False
+        if " " in message:
+            is_ok = False
+        if "'" in message:
+            is_ok = False
+        if not message.isascii():
+            is_ok = False
+
+        return is_ok
+
 
 # NOTE i am planning to make a single function instead of user_exists() and email_exists()
 # PS DONE
@@ -190,36 +211,55 @@ class SignUp(BaseModel): # SignUp basic model
     password: str
     email: str
 
-
-class GetUser(BaseModel): # Get user basic model
-    username: str
-    password: str
-
-
-class AdminUserRequest(BaseModel): # Admin user request
+class AdminUserRequest(BaseModel): # Admin basic model
     username: str
     password: str
     user_username: str
 
-
-class Login(BaseModel):
+class Login(BaseModel): # Login basic model
     username: str
     password: str
-    email: Optional[str] = None
 
-
-class LoginWithSession(BaseModel):
+class LoginWithSession(BaseModel): # When you want to use your session 
     username: str
     session: str
 
+class ChangeNick(Login): # Login, but also with nickname
+    nickname: str
 
-@app.post("/fastapi/") # Hello world!
+
+@app.post("/api/hello") # Hello world!
 def get_root(): 
     return {"Hello": "World!"}
 
 
+@app.post("/api/change_nick")
+def change_nick(login: ChangeNick): # Change user's nickname
+
+    if not dbc.value_exists("users", login.username, "username"):
+        return {"message": "This user does not exist"}
+
+    user = dbc.get_user_data(login.username)
+
+    if not user:
+        return {"message": "Incorrect username or password"}
+    if not fernet.decrypt(user["password"].encode()).decode() == login.password:
+        return {"message": "Incorrect username or password"}
+    if user["session_expire"] <= time.time():
+        dbc.set_is_active(login.username, False)
+        return {"message": "This sesssion is expired, make a new session!"}
+    if not user["is_active"]:
+        return {"message": "This user is not active"}
+    if not dbc.check_spelling(login.nickname):
+        return {"message": "Use an appropriate nickname"}
+    
+    dbc.change_nickname(login.username, login.nickname)
+
+    return {"message": "{} nickname was changed to {}".format(login.username, login.nickname)}
+
+
 @app.post("/api/update_session_expire_date")
-def update_session_expire_date(login: GetUser):
+def update_session_expire_date(login: Login):
 
     if not dbc.value_exists("users", login.username, "username"):
         return {"message": "This user does not exist"}
@@ -262,7 +302,7 @@ def new_session(login: LoginWithSession):
 
 
 @app.post("/api/get_session")
-def get_session(login: GetUser):
+def get_session(login: Login):
 
     if not dbc.value_exists("users", login.username, "username"):
         return {"message": "This user does not exist"}
@@ -297,19 +337,25 @@ def set_user_active_with_session(login: LoginWithSession):
 
 
 @app.post("/api/table") # get table from the database by it's name
-def get_table(table_name: str, getuser: GetUser):
+def get_table(table_name: str, login: Login):
     
-    if not dbc.value_exists("users", getuser.username, "username"):
+    if not dbc.value_exists("users", login.username, "username"):
         return {"message": "This user does not exist"}
 
-    user = dbc.get_user_data(getuser.username)
+    user = dbc.get_user_data(login.username)
     
     if not user:
         return {"message": "Incorrect username or password"}
-    if not fernet.decrypt(user["password"].encode()).decode() == getuser.password:
+    if not fernet.decrypt(user["password"].encode()).decode() == login.password:
         return {"message": "Incorrect username or password"}
     if not user["is_superuser"]:
         return {"message": "This user is not a superuser, so he can't access it"}
+    if user["session_expire"] <= time.time():
+        dbc.set_is_active(login.username, False)
+        return {"message": "This sesssion is expired, make a new session!"}
+    if not user["is_active"]:
+        return {"message": "This user is not active"}
+    
 
     return dbc.get_table(table_name)
 
@@ -328,6 +374,11 @@ def get_user_with_admin(aur: AdminUserRequest):
         return {"message": "Incorrect admin username or password"}
     if not user["is_superuser"]:
         return {"message": "You don't have access to this request!"} 
+    if user["session_expire"] <= time.time():
+        dbc.set_is_active(aur.username, False)
+        return {"message": "This sesssion is expired, make a new session!"}
+    if not user["is_active"]:
+        return {"message": "This user is not active"}
 
     if not dbc.value_exists("users", aur.user_username, "username"):
         return {"message": "This user does not exist"}
@@ -341,24 +392,28 @@ def get_user_with_admin(aur: AdminUserRequest):
 # I created new "users" table for the signup function, i hope you like it so we can keep it for now
 
 @app.post("/api/get_user")  # TODO make a demo of gettting user without password and email
-def get_user(getuser: GetUser): # get user, you must know the password in order to access it
+def get_user(login: Login): # get user, you must know the password in order to access it
 
-    if not dbc.value_exists("users", getuser.username, "username"):
+    if not dbc.value_exists("users", login.username, "username"):
         return {"message": "This user does not exist"}
 
-    user = dbc.get_user_data(getuser.username)
+    user = dbc.get_user_data(login.username)
 
     if user["session_expire"] <= time.time():
-        dbc.set_is_active(getuser.username, False)
+        dbc.set_is_active(login.username, False)
     
     if not user:
         return {"message": "Incorrect username or password"}
-    if not fernet.decrypt(user["password"].encode()).decode() == getuser.password:
+    if not fernet.decrypt(user["password"].encode()).decode() == login.password:
         return {"message": "Incorrect username or password"}
+    if user["session_expire"] <= time.time():
+        dbc.set_is_active(login.username, False)
+        return {"message": "This sesssion is expired, make a new session!"}
     if not user["is_active"]:
         return {"message": "This user is not active"}
 
-    return {getuser.username: user}
+
+    return {login.username: user}
 
 
 @app.post("/api/get_user_demo")
@@ -388,6 +443,10 @@ def signup(signup: SignUp):
         return {"message": "Username can not contain spaces"}
     if " " in signup.password:
         return {"message": "Password can not contain spaces"}
+    if "'" in signup.password or "'" in signup.username or "'" in signup.email:
+        return {"message": "No special characters"}
+    if not signup.password.isascii() or not signup.email.isascii() or not signup.username.isascii():
+        return {"message": "No special characters"}
 
     userExists = dbc.value_exists("users", signup.username, "username")
     emailExists = dbc.value_exists("users", signup.email, "email")
@@ -399,8 +458,8 @@ def signup(signup: SignUp):
     token, _ = Secret.get_secret(60, "TTT")
     session, time_created = Secret.get_secret(30, "")
 
-    dbc.cursor.execute("""INSERT INTO users (username, password, email, token, is_superuser, session, session_expire, is_active)
-        VALUES ('{}', '{}', '{}', '{}', false, '{}', {}, true)""".format(signup.username, signup.password, signup.email, token, session, time_created + config.configData["session_lenght"]))
+    dbc.cursor.execute("""INSERT INTO users (username, password, email, token, is_superuser, session, session_expire, is_active, money, time_spent_on_website)
+        VALUES ('{}', '{}', '{}', '{}', false, '{}', {}, true, 0, 0)""".format(signup.username, signup.password, signup.email, token, session, time_created + config.configData["session_lenght"]))
 
     dbc.conn.commit() # Session expire is a time.time() object, i think it's easier to work with it
 
