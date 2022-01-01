@@ -20,6 +20,7 @@ func newRouter() *mux.Router {
 	// Routers GET
 	r.HandleFunc("/register", scripts.RegisterUserPage).Methods("GET")
 	r.HandleFunc("/login", scripts.LoginUserPage).Methods("GET")
+	r.HandleFunc("/tac", scripts.TermsAndConditions).Methods("GET")
 	r.HandleFunc("/course", scripts.CoursePage).Methods("GET")         //login required
 	r.HandleFunc("/mycourses", scripts.UserCoursesPage).Methods("GET") //login required
 	r.HandleFunc("/market", scripts.MarketPage).Methods("GET")         //login required
@@ -32,6 +33,7 @@ func newRouter() *mux.Router {
 	r.HandleFunc("/mycourses", scripts.UserCoursesPost).Methods("POST") //login required
 	r.HandleFunc("/market", scripts.MarketPost).Methods("POST")         //login required
 	r.HandleFunc("/home", scripts.HomePost).Methods("POST")             //login required
+	r.HandleFunc("/api/create-wallet", scripts.CreateWallet).Methods("POST")
 
 	return r
 }

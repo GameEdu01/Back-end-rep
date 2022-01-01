@@ -38,6 +38,22 @@ func RegisterUserPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func TermsAndConditions(w http.ResponseWriter, r *http.Request) {
+	HomePageVars := PageVariables{}
+	t, err := template.ParseFiles("./templates/terms_and_conditions.html")
+	if err != nil { // if there is an error
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		return
+	}
+	err = t.Execute(w, HomePageVars)
+	if err != nil { // if there is an error
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		return
+	}
+}
+
 //LoginUserPage is responsible for sending login page to the front end
 func LoginUserPage(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
@@ -226,6 +242,10 @@ func UserCoursesPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//ToDo
+}
+
+func CreateWallet(w http.ResponseWriter, r *http.Request) {
+
 }
 
 //MarketPost ToDo
