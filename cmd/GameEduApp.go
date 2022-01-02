@@ -14,7 +14,7 @@ import (
 
 func main() {
 	port := os.Getenv("PORT")
-	urlPath := os.Getenv("/api/v1")
+	urlPath := ""
 
 	if port == "" {
 		log.Fatal("$PORT must be set")

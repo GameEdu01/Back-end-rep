@@ -9,11 +9,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
+	"time"
 )
 
-var SECRET_KEY = []byte("gosecretkey") //ToDo generate secret key
-
-var generatedToken string
+// Create the JWT key used to create the signature
+var jwtKey = []byte("my_secret_key")
 
 func getHash(pwd []byte) string {
 	hash, err := bcrypt.GenerateFromPassword(pwd, bcrypt.MinCost)
@@ -39,26 +39,16 @@ func GetIdByLogin(username string) (int, error) {
 	return id, nil
 }
 
-func GenerateJWT() (string, error) {
-	token := jwt.New(jwt.SigningMethodHS256)
-	tokenString, err := token.SignedString(SECRET_KEY)
-	if err != nil {
-		log.Println("Error in JWT token generation")
-		return "", err
-	}
-	return tokenString, nil
-}
-
 func UserSignup(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 	response.Header().Set("Content-Type", "application/json")
 	var user Types.UserAuth
-	var dbUser Types.UserAuth
+	var dbUser Types.User
 	json.NewDecoder(request.Body).Decode(&user)
 	user.Password = getHash([]byte(user.Password))
 
 	fmt.Println(user.Password, user.Username)
 
-	dbUser, err := GetLogin(user.Username, user.Password)
+	dbUser, err := GetLogin(user.Username)
 	if err != nil {
 		response.WriteHeader(http.StatusInternalServerError)
 		response.Write([]byte(`{"message":"` + err.Error() + `"}`))
@@ -75,10 +65,10 @@ func UserSignup(response http.ResponseWriter, request *http.Request, _ httproute
 func UserLogin(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 	response.Header().Set("Content-Type", "application/json")
 	var user Types.UserAuth
-	var dbUser Types.UserAuth
+	var dbUser Types.User
 	json.NewDecoder(request.Body).Decode(&user)
 
-	dbUser, err := GetLogin(user.Username, user.Password)
+	dbUser, err := GetLogin(user.Username)
 
 	if err != nil {
 		response.WriteHeader(http.StatusInternalServerError)
@@ -95,14 +85,32 @@ func UserLogin(response http.ResponseWriter, request *http.Request, _ httprouter
 		response.Write([]byte(`{"response":"Wrong Password!"}`))
 		return
 	}
-	jwtToken, err := GenerateJWT()
+
+	// Declare the expiration time of the token
+	// here, we have kept it as 5 minutes
+	expirationTime := time.Now().Add(5 * time.Minute)
+	// Create the JWT claims, which includes the username and expiry time
+	var creds Types.Credentials
+	claims := &Types.Claims{
+		Username: creds.Username,
+		StandardClaims: jwt.StandardClaims{
+			// In JWT, the expiry time is expressed as unix milliseconds
+			ExpiresAt: expirationTime.Unix(),
+		},
+	}
+
+	// Declare the token with the algorithm used for signing, and the claims
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	// Create the JWT string
+	tokenString, err := token.SignedString(jwtKey)
 	if err != nil {
+		// If there is an error in creating the JWT return an internal server error
 		response.WriteHeader(http.StatusInternalServerError)
-		response.Write([]byte(`{"message":"` + err.Error() + `"}`))
 		return
 	}
-	generatedToken = jwtToken
-	request.Header.Add("authToken", jwtToken)
-	http.Redirect(response, request, "http://localhost:8080/homepage", http.StatusFound)
+
+	response.WriteHeader(http.StatusOK)
+	response.Write([]byte(`{"authToken":"` + tokenString + `"}`))
+	fmt.Println(tokenString)
 	return
 }

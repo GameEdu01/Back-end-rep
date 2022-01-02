@@ -212,12 +212,12 @@
 
     if (!response)
       alert(`An error occured.`);
-
     if (JSON.stringify(response) === "{\"response\":\"Wrong Password!\"}")
       document.getElementById("error").style.visibility = "visible"
+    console.log(response)
 
-    console.log(JSON.stringify((response)))
 
+    //ToDo redirect to url+"/homepage" with jwtToken (placed in response) in header in field "authtoken"
   }
 
   //buildHeaders returns headers for request

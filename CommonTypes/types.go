@@ -1,14 +1,30 @@
 package CommonTypes
 
+import "github.com/dgrijalva/jwt-go"
+
 type UserAuth struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
+type AccessDetails struct {
+	AccessUuid string
+	UserId     int64
+}
+
+type TokenDetails struct {
+	AccessToken  string
+	RefreshToken string
+	AccessUuid   string
+	RefreshUuid  string
+	AtExpires    int64
+	RtExpires    int64
+}
+
 type User struct {
-	id       string
-	username string
-	password string
+	Id       string `json:"id"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 type Content struct {
@@ -39,4 +55,17 @@ type Login struct {
 type PageVariables struct {
 	Date string
 	Time string
+}
+
+// Create a struct to read the username and password from the request body
+type Credentials struct {
+	Password string `json:"password"`
+	Username string `json:"username"`
+}
+
+// Create a struct that will be encoded to a JWT.
+// We add jwt.StandardClaims as an embedded type, to provide fields like expiry time
+type Claims struct {
+	Username string `json:"username"`
+	jwt.StandardClaims
 }
