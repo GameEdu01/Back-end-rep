@@ -1,9 +1,11 @@
-package scripts
+package handler
 
 import (
+	Types "eduapp/CommonTypes"
 	"encoding/json"
 	"fmt"
 	uuid "github.com/google/uuid"
+	"github.com/julienschmidt/httprouter"
 	"html/template"
 	"io"
 	"io/ioutil"
@@ -11,19 +13,9 @@ import (
 	"strconv"
 )
 
-type Login struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-type PageVariables struct {
-	Date string
-	Time string
-}
-
 // RegisterUserPage is responsible for sending registration page to the front-end
-func RegisterUserPage(w http.ResponseWriter, r *http.Request) {
-	HomePageVars := PageVariables{}
+func RegisterUserPage(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	HomePageVars := Types.PageVariables{}
 	t, err := template.ParseFiles("./templates/register.html")
 	if err != nil { // if there is an error
 		w.WriteHeader(http.StatusInternalServerError)
@@ -38,17 +30,34 @@ func RegisterUserPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func TermsAndConditions(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	HomePageVars := Types.PageVariables{}
+	t, err := template.ParseFiles("./templates/terms_and_conditions.html")
+	if err != nil { // if there is an error
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		return
+	}
+	err = t.Execute(w, HomePageVars)
+	if err != nil { // if there is an error
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		return
+	}
+}
+
 //LoginUserPage is responsible for sending login page to the front end
-func LoginUserPage(w http.ResponseWriter, r *http.Request) {
+func LoginUserPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	err := r.ParseForm()
 	if err != nil {
 		return
 	}
 	if r.Method == "GET" {
-		t, err := template.ParseFiles("templates/login.html")
+		t, err := template.ParseFiles("./templates/login.html")
 		if err != nil { // if there is an error
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+			w.Write([]byte(`{"message":"` + `template parsing error` + `" +"error":"` + err.Error() + `"}`))
+
 			return
 		}
 		t.Execute(w, nil)
@@ -65,13 +74,7 @@ func LoginUserPage(w http.ResponseWriter, r *http.Request) {
 }
 
 //CoursePage is responsible for sending page with course content
-func CoursePage(w http.ResponseWriter, r *http.Request) {
-	authToken := r.Header.Get("authToken")
-	if !VerifyTokens(authToken) {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"message":"` + `incorect token` + `"}`))
-		return
-	}
+func CoursePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	b, err := io.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -103,14 +106,7 @@ func CoursePage(w http.ResponseWriter, r *http.Request) {
 }
 
 //UserCoursesPage is responsible for sending
-func UserCoursesPage(w http.ResponseWriter, r *http.Request) {
-	authToken := r.Header.Get("authToken")
-	if !VerifyTokens(authToken) {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"message":"` + `incorect token` + `"}`))
-		return
-	}
-
+func UserCoursesPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	b, err := io.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -142,13 +138,7 @@ func UserCoursesPage(w http.ResponseWriter, r *http.Request) {
 }
 
 //MarketPage responsible for giving courses for user to sell
-func MarketPage(w http.ResponseWriter, r *http.Request) {
-	authToken := r.Header.Get("authToken")
-	if !VerifyTokens(authToken) {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"message":"` + `incorect token` + `"}`))
-		return
-	}
+func MarketPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	t, err := template.ParseFiles("./templates/course.html")
 	if err != nil { // if there is an error
 		w.WriteHeader(http.StatusNoContent)
@@ -177,19 +167,25 @@ func MarketPage(w http.ResponseWriter, r *http.Request) {
 }
 
 //HomePage Todo
-func HomePage(w http.ResponseWriter, r *http.Request) {
-
+func HomePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	if r.Method == "GET" {
+		t, err := template.ParseFiles("templates/homepage.html")
+		if err != nil { // if there is an error
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+			return
+		}
+		err = t.Execute(w, nil)
+		if err != nil { // if there is an error
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+			return
+		}
+	}
 }
 
 //CoursePost is responsible for getting and saving data about new posts
-func CoursePost(w http.ResponseWriter, r *http.Request) {
-	authToken := r.Header.Get("authToken")
-	if !VerifyTokens(authToken) {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"message":"` + `incorect token` + `"}`))
-		return
-	}
-
+func CoursePost(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		fmt.Println(fmt.Errorf("Error: %v", err))
@@ -198,7 +194,7 @@ func CoursePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	req := &RequestCourse{}
+	req := &Types.RequestCourse{}
 	err = json.Unmarshal(body, req)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -217,23 +213,20 @@ func CoursePost(w http.ResponseWriter, r *http.Request) {
 }
 
 //UserCoursesPost is responsible for getting and saving updates about users courses
-func UserCoursesPost(w http.ResponseWriter, r *http.Request) {
-	authToken := r.Header.Get("authToken")
-	if !VerifyTokens(authToken) {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"message":"` + `incorect token` + `"}`))
-		return
-	}
-
+func UserCoursesPost(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	//ToDo
 }
 
+func CreateWallet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+
+}
+
 //MarketPost ToDo
-func MarketPost(w http.ResponseWriter, r *http.Request) {
+func MarketPost(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 }
 
 //HomePost ToDo
-func HomePost(w http.ResponseWriter, r *http.Request) {
+func HomePost(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 }

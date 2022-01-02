@@ -1,10 +1,11 @@
-package scripts
+package handler
 
 import (
+	Types "eduapp/CommonTypes"
 	"encoding/json"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
-	"go.mongodb.org/mongo-driver/mongo"
+	"github.com/julienschmidt/httprouter"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
@@ -12,14 +13,7 @@ import (
 
 var SECRET_KEY = []byte("gosecretkey") //ToDo generate secret key
 
-type UserAuth struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
 var generatedToken string
-
-var client *mongo.Client
 
 func getHash(pwd []byte) string {
 	hash, err := bcrypt.GenerateFromPassword(pwd, bcrypt.MinCost)
@@ -55,10 +49,10 @@ func GenerateJWT() (string, error) {
 	return tokenString, nil
 }
 
-func UserSignup(response http.ResponseWriter, request *http.Request) {
+func UserSignup(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 	response.Header().Set("Content-Type", "application/json")
-	var user UserAuth
-	var dbUser UserAuth
+	var user Types.UserAuth
+	var dbUser Types.UserAuth
 	json.NewDecoder(request.Body).Decode(&user)
 	user.Password = getHash([]byte(user.Password))
 
@@ -78,10 +72,10 @@ func UserSignup(response http.ResponseWriter, request *http.Request) {
 	response.Write([]byte((`{"message":"` + `succesfully created user` + `"}"`)))
 }
 
-func UserLogin(response http.ResponseWriter, request *http.Request) {
+func UserLogin(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 	response.Header().Set("Content-Type", "application/json")
-	var user UserAuth
-	var dbUser UserAuth
+	var user Types.UserAuth
+	var dbUser Types.UserAuth
 	json.NewDecoder(request.Body).Decode(&user)
 
 	dbUser, err := GetLogin(user.Username, user.Password)
@@ -107,14 +101,8 @@ func UserLogin(response http.ResponseWriter, request *http.Request) {
 		response.Write([]byte(`{"message":"` + err.Error() + `"}`))
 		return
 	}
-	response.Write([]byte(`{"token":"` + jwtToken + `"}`))
 	generatedToken = jwtToken
+	request.Header.Add("authToken", jwtToken)
+	http.Redirect(response, request, "http://localhost:8080/homepage", http.StatusFound)
 	return
-}
-
-func VerifyTokens(authToken string) bool {
-	if authToken == generatedToken {
-		return true
-	}
-	return false
 }
