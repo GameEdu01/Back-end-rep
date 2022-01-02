@@ -2,6 +2,7 @@ package routing
 
 import (
 	"eduapp/pkg/handler"
+	"eduapp/pkg/middleware"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -15,15 +16,15 @@ func InitRouter(router *httprouter.Router, pathName string) {
 	routerWrap.GET("/register", handler.RegisterUserPage)
 	routerWrap.GET("/login", handler.LoginUserPage)
 	routerWrap.GET("/tac", handler.TermsAndConditions)
-	routerWrap.GET("/course", handler.CoursePage)         //login required
-	routerWrap.GET("/mycourses", handler.UserCoursesPage) //login required
-	routerWrap.GET("/market", handler.MarketPage)         //login required
-	routerWrap.GET("/homepage", handler.HomePage)         //login required
+	routerWrap.GET("/course", middleware.Middleware(handler.CoursePage))         //login required
+	routerWrap.GET("/mycourses", middleware.Middleware(handler.UserCoursesPage)) //login required
+	routerWrap.GET("/market", middleware.Middleware(handler.MarketPage))         //login required
+	routerWrap.GET("/homepage", middleware.Middleware(handler.HomePage))         //login required
 
 	//POST routers
-	routerWrap.POST("/course", handler.CoursePost)              //login required
-	routerWrap.POST("/mycourses", handler.UserCoursesPost)      //login required
-	routerWrap.POST("/market", handler.MarketPost)              //login required
-	routerWrap.POST("/homepage", handler.HomePost)              //login required
-	routerWrap.POST("/api/create-wallet", handler.CreateWallet) //login required
+	routerWrap.POST("/course", middleware.Middleware(handler.CoursePost))              //login required
+	routerWrap.POST("/mycourses", middleware.Middleware(handler.UserCoursesPost))      //login required
+	routerWrap.POST("/market", middleware.Middleware(handler.MarketPost))              //login required
+	routerWrap.POST("/homepage", middleware.Middleware(handler.HomePost))              //login required
+	routerWrap.POST("/api/create-wallet", middleware.Middleware(handler.CreateWallet)) //login required
 }
