@@ -24,16 +24,16 @@ func DbConnector() *sql.DB {
 	return db
 }
 
-func GetLogin(username string, password string) (Types.UserAuth, error) {
+func GetLogin(username string) (Types.User, error) {
 	db := DbConnector()
-	rows, err := db.Query("SELECT username, password FROM logins WHERE username=$1", username)
+	rows, err := db.Query("SELECT * FROM logins WHERE username=$1", username)
 	if err != nil {
-		return Types.UserAuth{}, err
+		return Types.User{}, err
 	}
-	var users Types.UserAuth
+	var users Types.User
 
 	for rows.Next() {
-		if err := rows.Scan(&users.Username, &users.Password); err != nil {
+		if err := rows.Scan(&users.Id, &users.Username, &users.Password); err != nil {
 			log.Fatalf("could not scan row: %v", err)
 		}
 
