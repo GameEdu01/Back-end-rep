@@ -109,8 +109,8 @@ func UserLogin(response http.ResponseWriter, request *http.Request, _ httprouter
 		return
 	}
 
-	response.Header().Set("authToken", tokenString)
-	fmt.Println(tokenString)
 	response.WriteHeader(http.StatusOK)
+	response.Write([]byte(`{"authToken":"` + tokenString + `"}`))
+	fmt.Println(tokenString)
 	return
 }
