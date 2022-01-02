@@ -1,39 +1,14 @@
-package scripts
+package handler
 
 import (
 	"database/sql"
+	Types "eduapp/CommonTypes"
 	"fmt"
 	"github.com/google/uuid"
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"log"
 	"strconv"
 )
-
-type User struct {
-	id       string
-	username string
-	password string
-}
-
-type Content struct {
-	Request string `json:"request"`
-}
-
-type Course struct {
-	Id             int     `json:"id"`
-	Author_id      int     `json:"author_id"`
-	Price          float64 `json:"price"`
-	Owners         []int   `json:"owners"`
-	Game_name      string  `json:"game_name"`
-	Followers      int     `json:"followers"`
-	Course_content Content `json:"course_content"`
-}
-
-type RequestCourse struct {
-	Price          string  `json:"price"`
-	Game_name      string  `json:"game_name"`
-	Course_content Content `json:"course_content"`
-}
 
 func DbConnector() *sql.DB {
 	dbUrl := "postgres://udmehkiskcczbm:d4f6d3d3a48a96f498f7829d75ef285bd9777989c15a135aa5a72903fc86127e@ec2-54-161-164-220.compute-1.amazonaws.com:5432/d2d1ljqhqhl34q"
@@ -49,13 +24,13 @@ func DbConnector() *sql.DB {
 	return db
 }
 
-func GetLogin(username string, password string) (UserAuth, error) {
+func GetLogin(username string, password string) (Types.UserAuth, error) {
 	db := DbConnector()
 	rows, err := db.Query("SELECT username, password FROM logins WHERE username=$1", username)
 	if err != nil {
-		return UserAuth{}, err
+		return Types.UserAuth{}, err
 	}
-	var users UserAuth
+	var users Types.UserAuth
 
 	for rows.Next() {
 		if err := rows.Scan(&users.Username, &users.Password); err != nil {
@@ -82,9 +57,9 @@ func CreateUserInDB(username string, password string) {
 	fmt.Println(id)
 }
 
-func GetCourseById(db *sql.DB, id uuid.UUID) Course {
+func GetCourseById(db *sql.DB, id uuid.UUID) Types.Course {
 	row := db.QueryRow("SELECT * FROM courses WHERE id=$1", id)
-	course := Course{}
+	course := Types.Course{}
 	if err := row.Scan(
 		&course.Id, &course.Author_id,
 		&course.Price, &course.Game_name,
@@ -99,16 +74,16 @@ func GetCourseById(db *sql.DB, id uuid.UUID) Course {
 	return course
 }
 
-func GetCourseForUser(db *sql.DB, id int) []Course {
+func GetCourseForUser(db *sql.DB, id int) []Types.Course {
 	rows, err := db.Query("SELECT * FROM courses")
 	if err != nil {
 		log.Fatalf("could not execute query: %v", err)
 	}
 
-	var courses []Course
+	var courses []Types.Course
 
 	for rows.Next() {
-		course := Course{}
+		course := Types.Course{}
 		if err := rows.Scan(
 			&course.Id, &course.Author_id,
 			&course.Price, &course.Game_name,
@@ -130,7 +105,7 @@ func GetCourseForUser(db *sql.DB, id int) []Course {
 	return courses
 }
 
-func PostCourse(db *sql.DB, CoursePosted *RequestCourse, CourseId int) {
+func PostCourse(db *sql.DB, CoursePosted *Types.RequestCourse, CourseId int) {
 	PriceFloat, err := strconv.ParseFloat(CoursePosted.Price, 64)
 	if err != nil {
 		fmt.Errorf("could not parse price", err)
@@ -138,7 +113,7 @@ func PostCourse(db *sql.DB, CoursePosted *RequestCourse, CourseId int) {
 	var Owners []int
 	Owners = append(Owners, CourseId)
 
-	var SaveCourse Course
+	var SaveCourse Types.Course
 	SaveCourse.Course_content = CoursePosted.Course_content
 	SaveCourse.Game_name = CoursePosted.Game_name
 	SaveCourse.Price = PriceFloat
@@ -157,16 +132,16 @@ func PostCourse(db *sql.DB, CoursePosted *RequestCourse, CourseId int) {
 	fmt.Println(id)
 }
 
-func GetMarketForUser(db *sql.DB, id int) []Course {
+func GetMarketForUser(db *sql.DB, id int) []Types.Course {
 	rows, err := db.Query("SELECT * FROM courses")
 	if err != nil {
 		log.Fatalf("could not execute query: %v", err)
 	}
 
-	var courses []Course
+	var courses []Types.Course
 
 	for rows.Next() {
-		course := Course{}
+		course := Types.Course{}
 		if err := rows.Scan(
 			&course.Id, &course.Author_id,
 			&course.Price, &course.Game_name,

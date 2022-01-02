@@ -9,6 +9,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/heroku/x v0.0.42
 	github.com/jackc/pgx/v4 v4.14.0
+	github.com/julienschmidt/httprouter v1.3.0 // indirect
 	github.com/lib/pq v1.10.4 // indirect
 	github.com/tsileo/defender v0.0.0-20170101172908-959b6fc6dbd0 // indirect
 	go.mongodb.org/mongo-driver v1.8.1

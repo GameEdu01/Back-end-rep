@@ -6,3 +6,13 @@
 /dataSources.local.xml
 # Editor-based HTTP Client requests
 /httpRequests/ro
+
+# keys
+/cmd/private_key.pem
+/cmd/public_key.pem
+
+# instead usies heroku env
+/.env
+
+# .exe file
+/cmd/GameEduApp.exe
