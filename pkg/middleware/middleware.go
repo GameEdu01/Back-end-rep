@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/julienschmidt/httprouter"
+	"log"
 	"net/http"
 )
 
@@ -12,13 +13,17 @@ var jwtKey = []byte("my_secret_key")
 
 func Middleware(next httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-		tknStr := r.Header.Get("authtoken")
-		if len(tknStr) == 0 {
+		cookie, err := r.Cookie("authToken")
+
+		if err != nil {
+			log.Fatalf("Error occured while reading cookie")
+		}
+		if len(cookie.Value) == 0 {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 		claims := &Types.Claims{}
-		tkn, err := jwt.ParseWithClaims(tknStr, claims, func(token *jwt.Token) (interface{}, error) {
+		tkn, err := jwt.ParseWithClaims(cookie.Value, claims, func(token *jwt.Token) (interface{}, error) {
 			return jwtKey, nil
 		})
 		if err != nil {
@@ -27,6 +32,7 @@ func Middleware(next httprouter.Handle) httprouter.Handle {
 				return
 			}
 			fmt.Println(err.Error())
+			fmt.Println(tkn)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}

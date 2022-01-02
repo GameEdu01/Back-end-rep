@@ -217,10 +217,6 @@ func UserCoursesPost(w http.ResponseWriter, r *http.Request, ps httprouter.Param
 	//ToDo
 }
 
-func CreateWallet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-
-}
-
 //MarketPost ToDo
 func MarketPost(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 

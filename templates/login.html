@@ -212,12 +212,13 @@
 
     if (!response)
       alert(`An error occured.`);
+
+    console.log(response);
     if (JSON.stringify(response) === "{\"response\":\"Wrong Password!\"}")
       document.getElementById("error").style.visibility = "visible"
-    console.log(response)
 
-
-    //ToDo redirect to url+"/homepage" with jwtToken (placed in response) in header in field "authtoken"
+    console.log(response["authToken"])
+    setCookie("authToken", response["authToken"], 1)
   }
 
   //buildHeaders returns headers for request
@@ -239,6 +240,13 @@
     return jsonFormData;
   }
 
+  function setCookie(cname, cvalue, exdays) {
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    var expires = "expires="+d.toUTCString();
+    document.cookie = cname + "=" + cvalue + "; " + expires;
+    window.location.replace(url+"/homepage");
+  }
 
   form.addEventListener("submit", function(event) {
     // stop form submission
