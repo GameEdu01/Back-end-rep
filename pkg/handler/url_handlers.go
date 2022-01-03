@@ -32,7 +32,7 @@ func RegisterUserPage(w http.ResponseWriter, r *http.Request, _ httprouter.Param
 
 func TermsAndConditions(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	HomePageVars := Types.PageVariables{}
-	t, err := template.ParseFiles("./templates/terms_and_conditions.html")
+	t, err := template.ParseFiles("./templates/termsAndConditions.html")
 	if err != nil { // if there is an error
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))

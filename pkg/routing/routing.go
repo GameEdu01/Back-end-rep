@@ -20,11 +20,11 @@ func InitRouter(router *httprouter.Router, pathName string) {
 	routerWrap.GET("/mycourses", middleware.Middleware(handler.UserCoursesPage)) //login required
 	routerWrap.GET("/market", middleware.Middleware(handler.MarketPage))         //login required
 	routerWrap.GET("/homepage", middleware.Middleware(handler.HomePage))         //login required
+	routerWrap.GET("/verify", middleware.Middleware(handler.WalletVerifyPage))   //login required
 
 	//POST routers
-	routerWrap.POST("/course", middleware.Middleware(handler.CoursePost))              //login required
-	routerWrap.POST("/mycourses", middleware.Middleware(handler.UserCoursesPost))      //login required
-	routerWrap.POST("/market", middleware.Middleware(handler.MarketPost))              //login required
-	routerWrap.POST("/homepage", middleware.Middleware(handler.HomePost))              //login required
-	routerWrap.POST("/api/create-wallet", middleware.Middleware(handler.CreateWallet)) //login required
+	routerWrap.POST("/course", middleware.Middleware(handler.CoursePost))         //login required
+	routerWrap.POST("/mycourses", middleware.Middleware(handler.UserCoursesPost)) //login required
+	routerWrap.POST("/market", middleware.Middleware(handler.MarketPost))         //login required
+	routerWrap.POST("/homepage", middleware.Middleware(handler.HomePost))         //login required
 }

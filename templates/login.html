@@ -216,9 +216,9 @@
     console.log(response);
     if (JSON.stringify(response) === "{\"response\":\"Wrong Password!\"}")
       document.getElementById("error").style.visibility = "visible"
+    else
+      setCookie("authToken", response["authToken"], 1)
 
-    console.log(response["authToken"])
-    setCookie("authToken", response["authToken"], 1)
   }
 
   //buildHeaders returns headers for request
