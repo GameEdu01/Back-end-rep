@@ -41,6 +41,23 @@ type Course struct {
 	Course_content Content `json:"course_content"`
 }
 
+type RequestWalletSignUpSend struct {
+	Name     string `json:"name"`
+	Surname  string `json:"surname"`
+	Email    string `json:"email"`
+	Phone    string `json:"phone_number"`
+	Password string `json:"password"`
+}
+
+type RequestWalletSignUpResived struct {
+	Name     string `json:"name"`
+	Surname  string `json:"surname"`
+	Email    string `json:"email"`
+	Phone    string `json:"phone"`
+	Password string `json:"password"`
+	Agree    string `json:"agree"`
+}
+
 type RequestCourse struct {
 	Price          string  `json:"price"`
 	Game_name      string  `json:"game_name"`

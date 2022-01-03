@@ -9,6 +9,7 @@ import (
 func InitRouter(router *httprouter.Router, pathName string) {
 	router.POST(pathName+"/api/user/login", handler.UserLogin)
 	router.POST(pathName+"/api/user/signup", handler.UserSignup)
+	router.POST(pathName+"/api/wallet_signup", handler.CreateWallet)
 
 	routerWrap := NewRouterWrap(pathName, router)
 
