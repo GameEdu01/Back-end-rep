@@ -2,6 +2,7 @@ package handler
 
 import (
 	Types "eduapp/CommonTypes"
+	db2 "eduapp/pkg/db"
 	"encoding/json"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
@@ -24,7 +25,7 @@ func getHash(pwd []byte) string {
 }
 
 func GetIdByLogin(username string) (int, error) {
-	db := DbConnector()
+	db := db2.DbConnector()
 	rows, err := db.Query("SELECT id, username FROM logins WHERE username=$1", username)
 	if err != nil {
 		return 0, err
@@ -48,7 +49,7 @@ func UserSignup(response http.ResponseWriter, request *http.Request, _ httproute
 
 	fmt.Println(user.Password, user.Username)
 
-	dbUser, err := GetLogin(user.Username)
+	dbUser, err := db2.GetLogin(user.Username)
 	if err != nil {
 		response.WriteHeader(http.StatusInternalServerError)
 		response.Write([]byte(`{"message":"` + err.Error() + `"}`))
@@ -58,7 +59,7 @@ func UserSignup(response http.ResponseWriter, request *http.Request, _ httproute
 		response.Write([]byte((`{"message":"` + `trying to create existing user` + `"}"`)))
 		return
 	}
-	CreateUserInDB(user.Username, user.Password)
+	db2.CreateUserInDB(user.Username, user.Password)
 	response.Write([]byte((`{"message":"` + `succesfully created user` + `"}"`)))
 }
 
@@ -68,7 +69,7 @@ func UserLogin(response http.ResponseWriter, request *http.Request, _ httprouter
 	var dbUser Types.User
 	json.NewDecoder(request.Body).Decode(&user)
 
-	dbUser, err := GetLogin(user.Username)
+	dbUser, err := db2.GetLogin(user.Username)
 
 	if err != nil {
 		response.WriteHeader(http.StatusInternalServerError)

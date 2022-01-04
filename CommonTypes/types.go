@@ -41,6 +41,23 @@ type Course struct {
 	Course_content Content `json:"course_content"`
 }
 
+type RequestWalletSignUpSend struct {
+	Name     string `json:"name"`
+	Surname  string `json:"surname"`
+	Email    string `json:"email"`
+	Phone    string `json:"phone_number"`
+	Password string `json:"password"`
+}
+
+type RequestWalletSignUpResived struct {
+	Name     string `json:"name"`
+	Surname  string `json:"surname"`
+	Email    string `json:"email"`
+	Phone    string `json:"phone"`
+	Password string `json:"password"`
+	Agree    string `json:"agree"`
+}
+
 type RequestCourse struct {
 	Price          string  `json:"price"`
 	Game_name      string  `json:"game_name"`
@@ -57,13 +74,13 @@ type PageVariables struct {
 	Time string
 }
 
-// Create a struct to read the username and password from the request body
+// Credentials Create a struct to read the username and password from the request body
 type Credentials struct {
 	Password string `json:"password"`
 	Username string `json:"username"`
 }
 
-// Create a struct that will be encoded to a JWT.
+// Claims Create a struct that will be encoded to a JWT.
 // We add jwt.StandardClaims as an embedded type, to provide fields like expiry time
 type Claims struct {
 	Username string `json:"username"`
