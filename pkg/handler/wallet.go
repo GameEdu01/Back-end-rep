@@ -37,7 +37,12 @@ func CreateWallet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	Payload.Password = req.Password
 
 	payloadBuf := new(bytes.Buffer)
-	json.NewEncoder(payloadBuf).Encode(Payload)
+	err = json.NewEncoder(payloadBuf).Encode(Payload)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(`{"message":"` + `error parsing request to json` + `"}`))
+		return
+	}
 
 	reqSend, err := http.NewRequest("POST", "https://gameedu-api.herokuapp.com/api/wallet_signup", payloadBuf)
 
@@ -79,15 +84,11 @@ func WalletVerifyPage(w http.ResponseWriter, r *http.Request, ps httprouter.Para
 
 			return
 		}
-		t.Execute(w, nil)
+		err = t.Execute(w, nil)
 		if err != nil { // if there is an error
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
 			return
-		} else {
-			username := r.Form["username"]
-			password := r.Form["password"]
-			fmt.Fprintf(w, "username = %s, password = %s", username, password)
 		}
 	}
 }

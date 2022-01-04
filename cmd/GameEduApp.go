@@ -1,7 +1,7 @@
 package main
 
 import (
-	"eduapp/pkg/handler"
+	"eduapp/pkg/db"
 	"eduapp/pkg/routing"
 	"encoding/json"
 	"fmt"
@@ -19,7 +19,7 @@ func main() {
 	if port == "" {
 		log.Fatal("$PORT must be set")
 	}
-	handler.DbConnector()
+	db.DbConnector()
 
 	router := httprouter.New()
 	router.GET("/about", aboutSCPR)

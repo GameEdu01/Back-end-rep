@@ -11,7 +11,7 @@ import (
 
 var jwtKey = []byte("my_secret_key")
 
-func Middleware(next httprouter.Handle) httprouter.Handle {
+func AuthMiddleware(next httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		cookie, err := r.Cookie("authToken")
 
