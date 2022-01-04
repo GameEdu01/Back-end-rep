@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>News App</title>
+
+  <style>
+    . {
+      margin: 0px;
+      padding: 0px;
+      box-sizing: border-box;
+    }
+    body{
+      font-family: "Roboto", sans-serif;
+      background: #ddd;
+    }
+    .app{
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      max-width: 640px;
+      border: 1px solid #ddd;
+      left: 50%;
+      top: 0px;
+      transform: translateX(-50%);
+      background: #fff;
+    }
+    .app .screen{
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      width: 100%;
+      height: 100%
+    }
+    .hidden{
+      display: none;
+    }
+    .main-screen {
+      overflow-y: auto;
+    }
+    .main-screen .logo{
+      font-size: 18px;
+      color: #111;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+      font-weight: 600;
+      padding: 20px;
+    }
+    .main-screen .catagories{
+      padding: 15px 10px 10px;
+      display: grid;
+      grid-auto-flow: column;
+      overflow-y: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      gap: 10px;
+    }
+    .main-screen .catagories > div {
+      padding: 10px 20px;
+      background: #ddd;
+      color: #111;
+      border-radius: 20px;
+      text-align: center;
+      cursor: pointer;
+    }
+    .main-screen .catagories::-webkit-scrollbar{
+      display: none;
+    }
+    .main-screen .catagories > div.active{
+      background: #111;
+      color: #fff;
+    }
+    .main-screen .news-list {
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .main-screen .news-list > .item {
+      border: 1px solid #ddd;
+      cursor: pointer;
+      box-shadow: 0px 5px 10px rgba(0,0,0,0.05);
+      max-width: 270px;
+    }
+    .main-screen .news-list > .item .thumbnail img {
+      width: 100%;
+      height: 200px;
+      object-fit: contain;
+    }
+    .main-screen .news-list > .item .details{
+      padding: 10px;
+    }
+    .main-screen .news-list > .item .details h2{
+      font-size: 16px;
+      border-bottom: 10px;
+    }
+    .main-screen .news-list > .item p {
+      font-size: 15px;
+      color: #555;
+      margin-top: 5px;
+    }
+    .news-screen .header{
+      width: 100%;
+      height: 50px;
+      background: #111;
+      padding: 10px;
+      overflow: hidden;
+      display: flex;
+    }
+    .news-screen .header .back-btn{
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      background: #eee;
+      color: #111;
+      text-align: center;
+      line-height: 25px;
+      cursor: pointer;
+    }
+
+    .news-screen .header .title {
+      font-size: 15px;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #eee;
+    }
+    .news-screen .news-frame iframe {
+      width: 100%;
+      height: 100%;
+    }
+
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="screen main-screen">
+    <div class="logo">
+      NewsApp
+    </div>
+    <div class="catagories"></div>
+    <div class="news-list"></div>
+  </div>
+  <div class="screen news-screen hidden">
+    <div class="header">
+      <div class="back-btn">&lt;</div>
+      <div class="title"></div>
+    </div>
+    <div class="news-frame">
+      <iframe id="news-frame"></iframe>
+    </div>
+  </div>
+</div>
+</body>
+<script>
+  let newsAPI = "http://api.mediastack.com/v1/news?countries=us,in&access_key=eff5532f62b03e51484f29add13c690e&categories=";
+  let dummyImage = "dummy-image.jpg" ;
+
+  let app = document.querySelector(".app");
+  let screen = {
+    main:app.querySelector(".main-screen"),
+    news:app.querySelector(".news-screen")
+  };
+
+  let catagories = ["General", "Business", "Technology", "Entertainment ", "Health", "science", "Sports"];
+
+  for(let i=0; i<catagories.length; i++) {
+    let div = document.createElement("div");
+    div.innerText = catagories[i];
+    div.addEventListener("click", function () {
+      screen.main.querySelector(".catagories .active").classList.remove("active");
+      div.classList.add("active");
+      fetchCategoryNews(catagories[i]);
+    });
+    if (i === 0) {
+      div.classList.add("active");
+      fetchCategoryNews(catagories[i]);
+    }
+    screen.main.querySelector(".catagories").appendChild(div);
+  }
+
+  async function fetchCategoryNews(catagory){
+    screen.main.querySelector(".news-list").innerHTML = "";
+    try {
+      let res = await fetch(newsAPI + catagory.toLowerCase());
+      let data = await res.json();
+      let news = data.data;
+
+      for(let i=0; i<news.length; i++){
+        let div = document.createElement("div");
+        div.classList.add("item");
+        div.addEventListener("click", function (){
+          showFullNews(news[i]);
+        });
+        div.innerHTML = `
+        <div class="thumbnail">
+            <img src ="${news[i].image || dummyImage}">
+        </div>
+        <div class="details">
+            <h2>${news[i].title}</h2>
+            <p>${news[i].description}</p>
+        </div>
+      `;
+        screen.main.querySelector(".news-list").appendChild(div);
+      }
+    } catch (msg){}
+  }
+
+  function  showFullNews(news){
+    screen.main.classList.add("hidden");
+    screen.main.classList.remove("hidden");
+
+    screen.news.querySelector(".header .title").innerText = news.title;
+    screen.news.querySelector(".header .back-btn").addEventListener("click",function (){
+      screen.news.classList.add("hidden");
+      screen.main.classList.remove("hidden");
+    });
+    screen.news.querySelector("#news-frame").src = news.url;
+  }
+
+</script>
+</html>

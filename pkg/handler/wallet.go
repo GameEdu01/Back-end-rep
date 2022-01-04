@@ -77,7 +77,7 @@ func WalletVerifyPage(w http.ResponseWriter, r *http.Request, ps httprouter.Para
 		return
 	}
 	if r.Method == "GET" {
-		t, err := template.ParseFiles("./templates/createWallet.html")
+		t, err := template.ParseFiles("./templates/CreateWallet.html")
 		if err != nil { // if there is an error
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(`{"message":"` + `template parsing error` + `" +"error":"` + err.Error() + `"}`))

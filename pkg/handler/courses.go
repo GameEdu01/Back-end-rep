@@ -31,7 +31,7 @@ func CoursePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 	content := db.GetCourseById(db.DbConnector(), id)
 
-	t, err := template.ParseFiles("./templates/course.html")
+	t, err := template.ParseFiles("./templates/Course.html")
 	if err != nil {
 		w.WriteHeader(http.StatusNoContent)
 		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
@@ -46,7 +46,7 @@ func CoursePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.WriteHeader(http.StatusOK)
 }
 
-//UserCoursesPage is responsible for sending
+//UserCoursesPage is responsible for sending courses owned by user
 func UserCoursesPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	b, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -64,7 +64,7 @@ func UserCoursesPage(w http.ResponseWriter, r *http.Request, ps httprouter.Param
 
 	content := db.GetCourseForUser(db.DbConnector(), id)
 
-	t, err := template.ParseFiles("./templates/course.html")
+	t, err := template.ParseFiles("./templates/Course.html")
 	if err != nil { // if there is an error
 		w.WriteHeader(http.StatusNoContent)
 		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))

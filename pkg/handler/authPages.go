@@ -11,7 +11,7 @@ import (
 // RegisterUserPage is responsible for sending registration page to the front-end
 func RegisterUserPage(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	HomePageVars := Types.PageVariables{}
-	t, err := template.ParseFiles("./templates/register.html")
+	t, err := template.ParseFiles("./templates/Register.html")
 	if err != nil { // if there is an error
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
@@ -28,7 +28,7 @@ func RegisterUserPage(w http.ResponseWriter, r *http.Request, _ httprouter.Param
 //TermsAndConditions is responsible for TaC page
 func TermsAndConditions(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	HomePageVars := Types.PageVariables{}
-	t, err := template.ParseFiles("./templates/termsAndConditions.html")
+	t, err := template.ParseFiles("./templates/TermsAndConditions.html")
 	if err != nil { // if there is an error
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
@@ -49,7 +49,7 @@ func LoginUserPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 		return
 	}
 	if r.Method == "GET" {
-		t, err := template.ParseFiles("./templates/login.html")
+		t, err := template.ParseFiles("./templates/Login.html")
 		if err != nil { // if there is an error
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(`{"message":"` + `template parsing error` + `" +"error":"` + err.Error() + `"}`))

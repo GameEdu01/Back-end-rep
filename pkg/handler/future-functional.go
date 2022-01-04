@@ -12,7 +12,7 @@ import (
 //MarketPage responsible for giving courses for user to sell
 //Future functional
 func MarketPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	t, err := template.ParseFiles("./templates/course.html")
+	t, err := template.ParseFiles("./templates/Course.html")
 	if err != nil { // if there is an error
 		w.WriteHeader(http.StatusNoContent)
 		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
