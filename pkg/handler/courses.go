@@ -46,6 +46,17 @@ func CoursePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func SendNewsFeed(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	Feed := db.GetNewsFeed(db.DbConnector(), 1)
+	b, err := json.Marshal(Feed)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"message":"` + `response parsing error` + `"}`))
+		return
+	}
+	fmt.Printf(string(b))
+}
+
 //UserCoursesPage is responsible for sending courses owned by user
 func UserCoursesPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	b, err := io.ReadAll(r.Body)

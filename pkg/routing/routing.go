@@ -18,6 +18,7 @@ func InitRouter(router *httprouter.Router, pathName string) {
 	routerWrap.GET("/mycourses", middleware.AuthMiddleware(handler.UserCoursesPage)) //login required
 	routerWrap.GET("/leaderboard", middleware.AuthMiddleware(handler.Leaderboard))   //login required
 	routerWrap.GET("/verify", middleware.AuthMiddleware(handler.WalletVerifyPage))   //login required
+	routerWrap.GET(pathName+"/api/newsfeed", handler.SendNewsFeed)
 
 	//POST routers
 	routerWrap.POST(pathName+"/api/user/login", handler.UserLogin)

@@ -35,10 +35,10 @@ type Course struct {
 	Id             int     `json:"id"`
 	Author_id      int     `json:"author_id"`
 	Price          float64 `json:"price"`
-	Owners         []int   `json:"owners"`
 	Game_name      string  `json:"game_name"`
 	Followers      int     `json:"followers"`
 	Course_content Content `json:"course_content"`
+	Owners         []int   `json:"owners"`
 }
 
 type RequestWalletSignUpSend struct {

@@ -74,6 +74,35 @@ func GetCourseById(db *sql.DB, id uuid.UUID) Types.Course {
 	return course
 }
 
+func GetNewsFeed(db *sql.DB, ammount int) []Types.Course {
+	rows, err := db.Query("SELECT * FROM courses")
+	if err != nil {
+		log.Fatalf("could not execute query: %v", err)
+	}
+
+	var courses []Types.Course
+
+	for rows.Next() {
+		course := Types.Course{}
+		if err := rows.Scan(
+			&course.Id, &course.Author_id,
+			&course.Price, &course.Game_name,
+			&course.Followers, &course.Course_content,
+			&course.Owners,
+		); err != nil {
+			log.Fatalf("could not scan row: %v", err)
+		}
+
+		fmt.Println(ammount)
+		for i := 0; i < ammount; i++ {
+			courses = append(courses, course)
+		}
+
+	}
+	fmt.Print(courses)
+	return courses
+}
+
 func GetCourseForUser(db *sql.DB, id int) []Types.Course {
 	rows, err := db.Query("SELECT * FROM courses")
 	if err != nil {
