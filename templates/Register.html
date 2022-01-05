@@ -223,7 +223,11 @@
 
     if (JSON.stringify(response) === "{\"response\":\"Wrong Password!\"}")
       document.getElementById("error").style.visibility = "visible"
-
+    else
+      if (JSON.stringify(response) === "{\"response\":\"Trying to create existing user!\"}")
+        document.getElementById("error").style.visibility = "visible"
+      else
+        setCookie("authToken", response["authToken"])
     console.log(JSON.stringify((response)))
 
   }
@@ -247,6 +251,14 @@
     return jsonFormData;
   }
 
+  function setCookie(cname, cvalue) {
+    var d = new Date();
+    d.setTime(d.getTime() + (10*24*60*60*1000));
+    var expires = "expires="+d.toUTCString();
+    document.cookie = cname + "=" + cvalue + "; " + expires;
+    window.location.replace(url+"/newsfeed");
+  }
+
 
   form.addEventListener("submit", function(event) {
     // stop form submission
@@ -258,7 +270,6 @@
     //submiting and chaecking values
     if (usernameValid && passwordValid && agreementValid) {
       submitForm(form);
-      window.location.href = "http://localhost:8080/homepage";
     } else {
       document.getElementById("error").style.visibility = "visible"
     }

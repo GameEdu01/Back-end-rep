@@ -56,7 +56,7 @@ func UserSignup(response http.ResponseWriter, request *http.Request, _ httproute
 		return
 	}
 	if dbUser.Username == user.Username {
-		response.Write([]byte((`{"message":"` + `trying to create existing user` + `"}"`)))
+		response.Write([]byte(`{"response":"Trying to create existing user!"}`))
 		return
 	}
 	db2.CreateUserInDB(user.Username, user.Password)
