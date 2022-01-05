@@ -1,4 +1,4 @@
-package handler
+package auth
 
 import (
 	Types "eduapp/CommonTypes"

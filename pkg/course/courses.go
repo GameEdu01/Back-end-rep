@@ -1,4 +1,4 @@
-package handler
+package course
 
 import (
 	Types "eduapp/CommonTypes"
@@ -46,6 +46,35 @@ func CoursePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func SendNewsFeed(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	Feed := db.GetNewsFeed(db.DbConnector(), 1)
+	b, err := json.Marshal(Feed)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"message":"` + `response parsing error` + `"}`))
+		return
+	}
+	fmt.Println(string(b))
+	w.Write(b)
+}
+
+func NewsFeedPage(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
+	HomePageVars := Types.PageVariables{}
+	t, err := template.ParseFiles("./templates/NewsFeed.html")
+	if err != nil {
+		w.WriteHeader(http.StatusNoContent)
+		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		return
+	}
+	err = t.Execute(w, HomePageVars)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		return
+	}
+
+}
+
 //UserCoursesPage is responsible for sending courses owned by user
 func UserCoursesPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	b, err := io.ReadAll(r.Body)
@@ -88,21 +117,16 @@ func CoursePost(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	req := &Types.RequestCourse{}
+	req := &Types.Course{}
 	err = json.Unmarshal(body, req)
 	if err != nil {
+		fmt.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(`{"message":"` + `error parsing request` + `"}`))
 		return
 	}
 	fmt.Printf("%+v\n", req)
-	id, err := GetIdByLogin(r.Header.Get("username"))
-	if err != nil {
-		w.WriteHeader(http.StatusConflict)
-		w.Write([]byte(`{"message":"` + `unable to find user in db` + `"}`))
-	}
-	fmt.Print(id)
-	db.PostCourse(db.DbConnector(), req, id)
+	db.PostCourse(db.DbConnector(), req)
 	return
 }
 

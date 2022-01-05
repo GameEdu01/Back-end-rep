@@ -1,4 +1,4 @@
-package handler
+package future
 
 import (
 	"eduapp/pkg/db"
@@ -36,5 +36,24 @@ func MarketPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
 		return
+	}
+}
+
+//Leaderboard Todo
+//Future functional
+func Leaderboard(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	if r.Method == "GET" {
+		t, err := template.ParseFiles("./templates/Leaderboard.html")
+		if err != nil { // if there is an error
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+			return
+		}
+		err = t.Execute(w, nil)
+		if err != nil { // if there is an error
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+			return
+		}
 	}
 }

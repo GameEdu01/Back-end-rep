@@ -1,6 +1,9 @@
 package CommonTypes
 
-import "github.com/dgrijalva/jwt-go"
+import (
+	"encoding/json"
+	"github.com/dgrijalva/jwt-go"
+)
 
 type UserAuth struct {
 	Username string `json:"username"`
@@ -28,17 +31,20 @@ type User struct {
 }
 
 type Content struct {
-	Request string `json:"request"`
+	Request json.RawMessage `json:"request"`
 }
 
 type Course struct {
-	Id             int     `json:"id"`
-	Author_id      int     `json:"author_id"`
-	Price          float64 `json:"price"`
-	Owners         []int   `json:"owners"`
-	Game_name      string  `json:"game_name"`
-	Followers      int     `json:"followers"`
-	Course_content Content `json:"course_content"`
+	Id          int    `json:"id"`
+	Author_id   int    `json:"author_id"`
+	Category    string `json:"category"`
+	Game        string `json:"game"`
+	Description string `json:"description"`
+	Image       string `json:"image"`
+	Language    string `json:"language"`
+	PublishedAt string `json:"published_at"`
+	Title       string `json:"title"`
+	Url         string `json:"url"`
 }
 
 type RequestWalletSignUpSend struct {
@@ -56,12 +62,6 @@ type RequestWalletSignUpResived struct {
 	Phone    string `json:"phone"`
 	Password string `json:"password"`
 	Agree    string `json:"agree"`
-}
-
-type RequestCourse struct {
-	Price          string  `json:"price"`
-	Game_name      string  `json:"game_name"`
-	Course_content Content `json:"course_content"`
 }
 
 type Login struct {

@@ -1,4 +1,4 @@
-package handler
+package wallet
 
 import (
 	"bytes"
