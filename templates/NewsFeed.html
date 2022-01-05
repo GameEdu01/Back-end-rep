@@ -197,10 +197,11 @@
   async function fetchCategoryNews(catagory){
     screen.main.querySelector(".news-list").innerHTML = "";
     try {
-      let res = await fetch(newsAPI + catagory.toLowerCase());
-      let data = await res.json();
-      let news = data.data;
-      console.log(data.data)
+      //let res = await fetch(newsAPI + catagory.toLowerCase());
+
+      let res = await fetch(newsAPI);
+      let news = await res.json();
+      console.log(news)
 
       for(let i=0; i<news.length; i++){
         let div = document.createElement("div");

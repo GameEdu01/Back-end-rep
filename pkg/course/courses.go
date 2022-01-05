@@ -56,8 +56,23 @@ func SendNewsFeed(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	}
 	fmt.Println(string(b))
 	w.Write(b)
-	w.WriteHeader(http.StatusOK)
-	return
+}
+
+func NewsFeedPage(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
+	HomePageVars := Types.PageVariables{}
+	t, err := template.ParseFiles("./templates/NewsFeed.html")
+	if err != nil {
+		w.WriteHeader(http.StatusNoContent)
+		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		return
+	}
+	err = t.Execute(w, HomePageVars)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		return
+	}
+
 }
 
 //UserCoursesPage is responsible for sending courses owned by user
