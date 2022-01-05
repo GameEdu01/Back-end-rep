@@ -1,4 +1,4 @@
-package handler
+package course
 
 import (
 	Types "eduapp/CommonTypes"
@@ -54,7 +54,10 @@ func SendNewsFeed(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 		w.Write([]byte(`{"message":"` + `response parsing error` + `"}`))
 		return
 	}
-	fmt.Printf(string(b))
+	fmt.Println(string(b))
+	w.Write(b)
+	w.WriteHeader(http.StatusOK)
+	return
 }
 
 //UserCoursesPage is responsible for sending courses owned by user
@@ -99,21 +102,16 @@ func CoursePost(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	req := &Types.RequestCourse{}
+	req := &Types.Course{}
 	err = json.Unmarshal(body, req)
 	if err != nil {
+		fmt.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(`{"message":"` + `error parsing request` + `"}`))
 		return
 	}
 	fmt.Printf("%+v\n", req)
-	id, err := GetIdByLogin(r.Header.Get("username"))
-	if err != nil {
-		w.WriteHeader(http.StatusConflict)
-		w.Write([]byte(`{"message":"` + `unable to find user in db` + `"}`))
-	}
-	fmt.Print(id)
-	db.PostCourse(db.DbConnector(), req, id)
+	db.PostCourse(db.DbConnector(), req)
 	return
 }
 

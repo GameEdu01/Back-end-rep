@@ -7,7 +7,6 @@ import (
 	"github.com/google/uuid"
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"log"
-	"strconv"
 )
 
 func DbConnector() *sql.DB {
@@ -62,9 +61,10 @@ func GetCourseById(db *sql.DB, id uuid.UUID) Types.Course {
 	course := Types.Course{}
 	if err := row.Scan(
 		&course.Id, &course.Author_id,
-		&course.Price, &course.Game_name,
-		&course.Followers, &course.Course_content,
-		&course.Owners,
+		&course.Category, &course.Game,
+		&course.Description, &course.Image,
+		&course.Language, &course.PublishedAt,
+		&course.Title, &course.Url,
 	); err != nil {
 		log.Fatalf("could not scan row: %v", err)
 	}
@@ -86,20 +86,19 @@ func GetNewsFeed(db *sql.DB, ammount int) []Types.Course {
 		course := Types.Course{}
 		if err := rows.Scan(
 			&course.Id, &course.Author_id,
-			&course.Price, &course.Game_name,
-			&course.Followers, &course.Course_content,
-			&course.Owners,
+			&course.Category, &course.Game,
+			&course.Description, &course.Image,
+			&course.Language, &course.PublishedAt,
+			&course.Title, &course.Url,
 		); err != nil {
 			log.Fatalf("could not scan row: %v", err)
 		}
-
 		fmt.Println(ammount)
 		for i := 0; i < ammount; i++ {
 			courses = append(courses, course)
 		}
-
 	}
-	fmt.Print(courses)
+	fmt.Println(courses)
 	return courses
 }
 
@@ -115,42 +114,31 @@ func GetCourseForUser(db *sql.DB, id int) []Types.Course {
 		course := Types.Course{}
 		if err := rows.Scan(
 			&course.Id, &course.Author_id,
-			&course.Price, &course.Game_name,
-			&course.Followers, &course.Course_content,
-			&course.Owners,
+			&course.Category, &course.Game,
+			&course.Description, &course.Image,
+			&course.Language, &course.PublishedAt,
+			&course.Title, &course.Url,
 		); err != nil {
 			log.Fatalf("could not scan row: %v", err)
 		}
-
-		fmt.Println(id)
-		for i := 0; i < len(course.Owners); i++ {
-			if course.Owners[i] == id {
-				courses = append(courses, course)
-			}
-		}
-
 	}
 	fmt.Print(courses)
 	return courses
 }
 
-func PostCourse(db *sql.DB, CoursePosted *Types.RequestCourse, CourseId int) {
-	PriceFloat, err := strconv.ParseFloat(CoursePosted.Price, 64)
-	if err != nil {
-		fmt.Errorf("could not parse price", err)
-	}
-	var Owners []int
-	Owners = append(Owners, CourseId)
-
+func PostCourse(db *sql.DB, CoursePosted *Types.Course) {
 	var SaveCourse Types.Course
-	SaveCourse.Course_content = CoursePosted.Course_content
-	SaveCourse.Game_name = CoursePosted.Game_name
-	SaveCourse.Price = PriceFloat
-	SaveCourse.Author_id = CourseId
-	SaveCourse.Followers = 0
-	SaveCourse.Owners = Owners
+	SaveCourse.Author_id = CoursePosted.Author_id
+	SaveCourse.Category = CoursePosted.Category
+	SaveCourse.Game = CoursePosted.Game
+	SaveCourse.Description = CoursePosted.Description
+	SaveCourse.Image = CoursePosted.Image
+	SaveCourse.Language = CoursePosted.Language
+	SaveCourse.PublishedAt = CoursePosted.PublishedAt
+	SaveCourse.Title = CoursePosted.Title
+	SaveCourse.Url = CoursePosted.Url
 
-	result, err := db.Exec("INSERT INTO courses (author_id, price, game_name, followers, course_content, owners) VALUES ($1, $2, $3, $4, $5, $6)", SaveCourse.Author_id, SaveCourse.Price, SaveCourse.Game_name, SaveCourse.Followers, SaveCourse.Course_content, SaveCourse.Owners)
+	result, err := db.Exec("INSERT INTO courses (author_id, category_game, game, description, image, language_content, published_at, title, url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)", SaveCourse.Author_id, SaveCourse.Category, SaveCourse.Game, SaveCourse.Description, SaveCourse.Image, SaveCourse.Language, SaveCourse.PublishedAt, SaveCourse.Title, SaveCourse.Url)
 	if err != nil {
 		fmt.Errorf("Error: %v", err)
 	}
@@ -173,9 +161,10 @@ func GetMarketForUser(db *sql.DB, id int) []Types.Course {
 		course := Types.Course{}
 		if err := rows.Scan(
 			&course.Id, &course.Author_id,
-			&course.Price, &course.Game_name,
-			&course.Followers, &course.Course_content,
-			&course.Owners,
+			&course.Category, &course.Game,
+			&course.Description, &course.Image,
+			&course.Language, &course.PublishedAt,
+			&course.Title, &course.Url,
 		); err != nil {
 			log.Fatalf("could not scan row: %v", err)
 		}

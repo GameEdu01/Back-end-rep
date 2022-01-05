@@ -151,7 +151,7 @@
 <div class="app">
   <div class="screen main-screen">
     <div class="logo">
-      Poppular Posts
+      Popular Posts
     </div>
     <div class="catagories"></div>
     <div class="news-list"></div>
@@ -168,7 +168,7 @@
 </div>
 </body>
 <script>
-  let newsAPI = "http://api.mediastack.com/v1/news?&access_key=eff5532f62b03e51484f29add13c690e&categories=";
+  let newsAPI = "http://localhost:8080/api/newsfeed";
   let dummyImage = "dummy-image.jpg" ;
 
   let app = document.querySelector(".app");
@@ -233,6 +233,5 @@
     });
     screen.news.querySelector("#news-frame").src = news.url;
   }
-
 </script>
 </html>

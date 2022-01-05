@@ -13,25 +13,25 @@ type RouterWrap struct {
 	optionUrls map[string]bool
 }
 
-// GET is wrap method over adding GET method handler and OPTION handler to allow CORS
+// GET is wrap method over adding GET method future and OPTION future to allow CORS
 func (r *RouterWrap) GET(path string, handle httprouter.Handle) {
 	r.router.GET(r.prefix+path, handle)
 	r.OptionsCors(path, optionsCORSHandler)
 }
 
-// POST is wrap method over adding POST method handler and OPTION handler to allow CORS
+// POST is wrap method over adding POST method future and OPTION future to allow CORS
 func (r *RouterWrap) POST(path string, handle httprouter.Handle) {
 	r.router.POST(r.prefix+path, handle)
 	r.OptionsCors(path, optionsCORSHandler)
 }
 
-// PUT is wrap method over adding PUT method handler and OPTION handler to allow CORS
+// PUT is wrap method over adding PUT method future and OPTION future to allow CORS
 func (r *RouterWrap) PUT(path string, handle httprouter.Handle) {
 	r.router.PUT(r.prefix+path, handle)
 	r.OptionsCors(path, optionsCORSHandler)
 }
 
-// DELETE is wrap method over adding DELETE method handler and OPTION handler to allow CORS
+// DELETE is wrap method over adding DELETE method future and OPTION future to allow CORS
 func (r *RouterWrap) DELETE(path string, handle httprouter.Handle) {
 	r.router.DELETE(r.prefix+path, handle)
 	r.OptionsCors(path, optionsCORSHandler)
