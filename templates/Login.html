@@ -163,12 +163,12 @@
 
 
 <div>
-  <h5 id="signup_link"> <a href="http://localhost:8080/register" class="link-signup"> Sign up</a> if you have an account</h5>
+  <h5 id="signup_link"> <a href="https://gameedu.herokuapp.com/register" class="link-signup"> Sign up</a> if you have an account</h5>
 </div>
 </body>
 
 <script>
-  const url = "http://localhost:8080";
+  const url = "https://gameedu.herokuapp.com";
   const form = document.getElementById("login_form");
 
   // FetchService is service that is called for requests
@@ -224,7 +224,7 @@
   //buildHeaders returns headers for request
   function buildHeaders(contentLength) {
     return {
-      "Host": "localhost:8080/login",
+      "Host": "https://gameedu.herokuapp.com/login",
       "Accept": "application/json",
       "Content-Type": "application/json",
       "Content-Length": contentLength
