@@ -2,6 +2,7 @@ package auth
 
 import (
 	Types "eduapp/CommonTypes"
+	myerrors "eduapp/pkg/errors"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"html/template"
@@ -15,12 +16,14 @@ func RegisterUserPage(w http.ResponseWriter, r *http.Request, _ httprouter.Param
 	if err != nil { // if there is an error
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		myerrors.Handle500(w, r)
 		return
 	}
 	err = t.Execute(w, HomePageVars)
 	if err != nil { // if there is an error
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		myerrors.Handle500(w, r)
 		return
 	}
 }
@@ -32,12 +35,33 @@ func TermsAndConditions(w http.ResponseWriter, r *http.Request, ps httprouter.Pa
 	if err != nil { // if there is an error
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		myerrors.Handle500(w, r)
 		return
 	}
 	err = t.Execute(w, HomePageVars)
 	if err != nil { // if there is an error
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		myerrors.Handle500(w, r)
+		return
+	}
+}
+
+//TermsAndConditions is responsible for TaC page
+func TermsAndConditionsForWallet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	HomePageVars := Types.PageVariables{}
+	t, err := template.ParseFiles("./templates/TermsAndConditionsForWallet.html")
+	if err != nil { // if there is an error
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		myerrors.Handle500(w, r)
+		return
+	}
+	err = t.Execute(w, HomePageVars)
+	if err != nil { // if there is an error
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		myerrors.Handle500(w, r)
 		return
 	}
 }
@@ -67,4 +91,8 @@ func LoginUserPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 			fmt.Fprintf(w, "username = %s, password = %s", username, password)
 		}
 	}
+}
+
+func ForwardToNewsFeed(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	http.Redirect(w, r, "/newsfeed", http.StatusFound)
 }

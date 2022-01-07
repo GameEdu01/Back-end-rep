@@ -158,8 +158,11 @@
   <br>
 
   <div class="field">
-    <p id="error" class="text-center" style="visibility: hidden;">Incorrect email/password</p>
+    <p id="error" class="text-center" style="visibility: hidden;">Some data is missing</p>
+    <p id="errorExistingUser" class="text-center" style="visibility: hidden;">Trying to create existing user</p>
   </div>
+
+  <br>
 
   <div class="field">
     <button type="submit" class="button" id="btn_submit">Register</button>
@@ -221,11 +224,14 @@
       alert(`An error occured.`);
 
 
+    document.getElementById("error").style.visibility = "hidden";
+    document.getElementById("errorExistingUser").style.visibility = "hidden";
+
     if (JSON.stringify(response) === "{\"response\":\"Wrong Password!\"}")
       document.getElementById("error").style.visibility = "visible"
     else
       if (JSON.stringify(response) === "{\"response\":\"Trying to create existing user!\"}")
-        document.getElementById("error").style.visibility = "visible"
+        document.getElementById("errorExistingUser").style.visibility = "visible"
       else
         setCookie("authToken", response["authToken"])
     console.log(JSON.stringify((response)))

@@ -3,6 +3,7 @@ package wallet
 import (
 	"bytes"
 	Types "eduapp/CommonTypes"
+	myerrors "eduapp/pkg/errors"
 	"encoding/json"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
@@ -17,6 +18,7 @@ func CreateWallet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 		fmt.Println(fmt.Errorf("Error: %v", err))
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(`{"message":"` + `error parsing request` + `"}`))
+		myerrors.Handle400(w, r)
 		return
 	}
 
@@ -25,6 +27,7 @@ func CreateWallet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(`{"message":"` + `error parsing request` + `"}`))
+		myerrors.Handle400(w, r)
 		return
 	}
 	fmt.Println(*req)
@@ -41,6 +44,7 @@ func CreateWallet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(`{"message":"` + `error parsing request to json` + `"}`))
+		myerrors.Handle400(w, r)
 		return
 	}
 
@@ -49,6 +53,7 @@ func CreateWallet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(`{"message":"` + `error parsing request` + `"}`))
+		myerrors.Handle400(w, r)
 		return
 	}
 
@@ -57,6 +62,7 @@ func CreateWallet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(`{"message":"` + `error sending request` + `"}`))
+		myerrors.Handle500(w, r)
 	}
 
 	defer res.Body.Close()
@@ -65,6 +71,7 @@ func CreateWallet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(`{"message":"` + `error parsing response` + `"}`))
+		myerrors.Handle400(w, r)
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -81,13 +88,14 @@ func WalletVerifyPage(w http.ResponseWriter, r *http.Request, ps httprouter.Para
 		if err != nil { // if there is an error
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(`{"message":"` + `template parsing error` + `" +"error":"` + err.Error() + `"}`))
-
+			myerrors.Handle500(w, r)
 			return
 		}
 		err = t.Execute(w, nil)
 		if err != nil { // if there is an error
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+			myerrors.Handle500(w, r)
 			return
 		}
 	}

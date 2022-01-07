@@ -3,6 +3,7 @@ package auth
 import (
 	Types "eduapp/CommonTypes"
 	db2 "eduapp/pkg/db"
+	myerrors "eduapp/pkg/errors"
 	"encoding/json"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
@@ -53,6 +54,7 @@ func UserSignup(response http.ResponseWriter, request *http.Request, _ httproute
 	if err != nil {
 		response.WriteHeader(http.StatusInternalServerError)
 		response.Write([]byte(`{"message":"` + err.Error() + `"}`))
+		myerrors.Handle500(response, request)
 		return
 	}
 	if dbUser.Username == user.Username {
@@ -74,6 +76,7 @@ func UserLogin(response http.ResponseWriter, request *http.Request, _ httprouter
 	if err != nil {
 		response.WriteHeader(http.StatusInternalServerError)
 		response.Write([]byte(`{"message":"` + err.Error() + `"}`))
+		myerrors.Handle500(response, request)
 		return
 	}
 	userPass := []byte(user.Password)
@@ -107,6 +110,7 @@ func UserLogin(response http.ResponseWriter, request *http.Request, _ httprouter
 	if err != nil {
 		// If there is an error in creating the JWT return an internal server error
 		response.WriteHeader(http.StatusInternalServerError)
+		myerrors.Handle500(response, request)
 		return
 	}
 

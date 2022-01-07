@@ -2,10 +2,10 @@ package middleware
 
 import (
 	Types "eduapp/CommonTypes"
+	myerrors "eduapp/pkg/errors"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/julienschmidt/httprouter"
-	"log"
 	"net/http"
 )
 
@@ -16,10 +16,14 @@ func AuthMiddleware(next httprouter.Handle) httprouter.Handle {
 		cookie, err := r.Cookie("authToken")
 
 		if err != nil {
-			log.Fatalf("Error occured while reading cookie")
+			fmt.Println("Error occured while reading cookie")
+			w.WriteHeader(http.StatusUnauthorized)
+			myerrors.Handle401(w, r)
+			return
 		}
 		if len(cookie.Value) == 0 {
 			w.WriteHeader(http.StatusUnauthorized)
+			myerrors.Handle401(w, r)
 			return
 		}
 		claims := &Types.Claims{}
@@ -29,15 +33,18 @@ func AuthMiddleware(next httprouter.Handle) httprouter.Handle {
 		if err != nil {
 			if err == jwt.ErrSignatureInvalid {
 				w.WriteHeader(http.StatusUnauthorized)
+				myerrors.Handle401(w, r)
 				return
 			}
 			fmt.Println(err.Error())
 			fmt.Println(tkn)
 			w.WriteHeader(http.StatusBadRequest)
+			myerrors.Handle400(w, r)
 			return
 		}
 		if !tkn.Valid {
 			w.WriteHeader(http.StatusUnauthorized)
+			myerrors.Handle401(w, r)
 			return
 		}
 		next(w, r.WithContext(r.Context()), ps)

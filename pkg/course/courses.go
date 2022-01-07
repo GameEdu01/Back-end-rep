@@ -3,6 +3,7 @@ package course
 import (
 	Types "eduapp/CommonTypes"
 	"eduapp/pkg/db"
+	myerrors "eduapp/pkg/errors"
 	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
@@ -20,6 +21,7 @@ func CoursePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(`{"message":"` + `unable to parse request` + `"}`))
+		myerrors.Handle400(w, r)
 		return
 	}
 
@@ -27,20 +29,23 @@ func CoursePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(`{"message":"` + `error parsing UUID` + `"}`))
+		myerrors.Handle400(w, r)
 		return
 	}
 	content := db.GetCourseById(db.DbConnector(), id)
 
 	t, err := template.ParseFiles("./templates/Course.html")
 	if err != nil {
-		w.WriteHeader(http.StatusNoContent)
+		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		myerrors.Handle500(w, r)
 		return
 	}
 	err = t.Execute(w, content)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		myerrors.Handle500(w, r)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -52,27 +57,29 @@ func SendNewsFeed(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(`{"message":"` + `response parsing error` + `"}`))
+		myerrors.Handle500(w, r)
 		return
 	}
 	fmt.Println(string(b))
 	w.Write(b)
 }
 
-func NewsFeedPage(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
+func NewsFeedPage(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	HomePageVars := Types.PageVariables{}
 	t, err := template.ParseFiles("./templates/NewsFeed.html")
 	if err != nil {
-		w.WriteHeader(http.StatusNoContent)
+		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		myerrors.Handle500(w, r)
 		return
 	}
 	err = t.Execute(w, HomePageVars)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		myerrors.Handle500(w, r)
 		return
 	}
-
 }
 
 //UserCoursesPage is responsible for sending courses owned by user
@@ -81,6 +88,7 @@ func UserCoursesPage(w http.ResponseWriter, r *http.Request, ps httprouter.Param
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(`{"message":"` + `unable to parse request` + `"}`))
+		myerrors.Handle400(w, r)
 		return
 	}
 
@@ -88,6 +96,7 @@ func UserCoursesPage(w http.ResponseWriter, r *http.Request, ps httprouter.Param
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(`{"message":"` + `error parsing UUID` + `"}`))
+		myerrors.Handle400(w, r)
 		return
 	}
 
@@ -95,8 +104,9 @@ func UserCoursesPage(w http.ResponseWriter, r *http.Request, ps httprouter.Param
 
 	t, err := template.ParseFiles("./templates/Course.html")
 	if err != nil { // if there is an error
-		w.WriteHeader(http.StatusNoContent)
+		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		myerrors.Handle500(w, r)
 		return
 	}
 	err = t.Execute(w, content)
@@ -114,6 +124,7 @@ func CoursePost(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		fmt.Println(fmt.Errorf("Error: %v", err))
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(`{"message":"` + `error parsing request` + `"}`))
+		myerrors.Handle400(w, r)
 		return
 	}
 
@@ -123,6 +134,7 @@ func CoursePost(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		fmt.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(`{"message":"` + `error parsing request` + `"}`))
+		myerrors.Handle400(w, r)
 		return
 	}
 	fmt.Printf("%+v\n", req)
