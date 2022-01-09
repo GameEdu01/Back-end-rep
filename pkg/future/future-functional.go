@@ -43,7 +43,7 @@ func MarketPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 //Future functional
 func Leaderboard(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	if r.Method == "GET" {
-		t, err := template.ParseFiles("./templates/Leaderboard.html")
+		t, err := template.ParseFiles("./templates/nav.html")
 		if err != nil { // if there is an error
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))

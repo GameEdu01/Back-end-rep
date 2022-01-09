@@ -91,8 +91,8 @@ func UserLogin(response http.ResponseWriter, request *http.Request, _ httprouter
 	}
 
 	// Declare the expiration time of the token
-	// here, we have kept it as 5 minutes
-	expirationTime := time.Now().Add(5 * time.Minute)
+	// here, we have kept it as 60 minutes
+	expirationTime := time.Now().Add(60 * time.Minute)
 	// Create the JWT claims, which includes the username and expiry time
 	var creds Types.Credentials
 	claims := &Types.Claims{

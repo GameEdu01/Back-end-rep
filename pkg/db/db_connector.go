@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	Types "eduapp/CommonTypes"
 	"fmt"
-	"github.com/google/uuid"
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"log"
 )
@@ -56,17 +55,19 @@ func CreateUserInDB(username string, password string) {
 	fmt.Println(id)
 }
 
-func GetCourseById(db *sql.DB, id uuid.UUID) Types.Course {
+func GetCourseById(db *sql.DB, id int) Types.Course {
 	row := db.QueryRow("SELECT * FROM courses WHERE id=$1", id)
 	course := Types.Course{}
+
 	if err := row.Scan(
 		&course.Id, &course.Author_id,
 		&course.Category, &course.Game,
 		&course.Description, &course.Image,
 		&course.Language, &course.PublishedAt,
-		&course.Title, &course.Url,
+		&course.Title, &course.Content,
+		&course.Views,
 	); err != nil {
-		log.Fatalf("could not scan row: %v", err)
+		fmt.Println("could not scan row: %v", err)
 	}
 
 	fmt.Printf("found course:", course)
@@ -89,7 +90,7 @@ func GetNewsFeed(db *sql.DB, ammount int) []Types.Course {
 			&course.Category, &course.Game,
 			&course.Description, &course.Image,
 			&course.Language, &course.PublishedAt,
-			&course.Title, &course.Url, &course.Views,
+			&course.Title, &course.Content, &course.Views,
 		); err != nil {
 			log.Fatalf("could not scan row: %v", err)
 		}
@@ -117,7 +118,7 @@ func GetCourseForUser(db *sql.DB, id int) []Types.Course {
 			&course.Category, &course.Game,
 			&course.Description, &course.Image,
 			&course.Language, &course.PublishedAt,
-			&course.Title, &course.Url,
+			&course.Title, &course.Content,
 		); err != nil {
 			log.Fatalf("could not scan row: %v", err)
 		}
@@ -136,10 +137,10 @@ func PostCourse(db *sql.DB, CoursePosted *Types.Course) {
 	SaveCourse.Language = CoursePosted.Language
 	SaveCourse.PublishedAt = CoursePosted.PublishedAt
 	SaveCourse.Title = CoursePosted.Title
-	SaveCourse.Url = CoursePosted.Url
+	SaveCourse.Content = CoursePosted.Content
 	SaveCourse.Views = CoursePosted.Views
 
-	result, err := db.Exec("INSERT INTO courses (author_id, category_game, game, description, image, language_content, published_at, title, url, views) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)", SaveCourse.Author_id, SaveCourse.Category, SaveCourse.Game, SaveCourse.Description, SaveCourse.Image, SaveCourse.Language, SaveCourse.PublishedAt, SaveCourse.Title, SaveCourse.Url, SaveCourse.Views)
+	result, err := db.Exec("INSERT INTO courses (author_id, category_game, game, description, image, language_content, published_at, title, content, views) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)", SaveCourse.Author_id, SaveCourse.Category, SaveCourse.Game, SaveCourse.Description, SaveCourse.Image, SaveCourse.Language, SaveCourse.PublishedAt, SaveCourse.Title, SaveCourse.Content, SaveCourse.Views)
 	if err != nil {
 		fmt.Errorf("Error: %v", err)
 	}
@@ -165,7 +166,7 @@ func GetMarketForUser(db *sql.DB, id int) []Types.Course {
 			&course.Category, &course.Game,
 			&course.Description, &course.Image,
 			&course.Language, &course.PublishedAt,
-			&course.Title, &course.Url,
+			&course.Title, &course.Content,
 		); err != nil {
 			log.Fatalf("could not scan row: %v", err)
 		}

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Login</title>
+  <link
+          href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Alfa+Slab+One&family=Anton&family=Bangers&family=Bebas+Neue&family=Bigshot+One&family=Oswald:wght@700&family=Overpass+Mono:wght@700&family=Righteous&family=Suravaram&display=swap"
+          rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+
+  <style>
+    .background {
+    background-color: black;
+  }
+
+  body {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    display: grid;
+    justify-items: center;
+    align-items: center;
+    background-color: #1E1D2A;
+  }
+
+  #signup_link {
+    font-family: 'Righteous', cursive;
+    color: #FFFFFF;
+    padding-left: 18px;
+    padding-bottom: 275px;
+  }
+
+  .login_form{
+    width: 80%;
+    height: 80%;
+  }
+
+  .login_title {
+    font-family: 'Archivo Black', sans-serif;
+    size: 27pc;
+    color: #F5F5F5;
+  }
+
+  .error_message{
+    color: #34D178;
+    text-decoration: none;
+  }
+
+  .field {
+    height:auto;
+    width:100%;
+    background-color:black;
+    color:white;
+    border-color: white;
+    border-radius: 8px;
+  }
+
+  ::placeholder {
+    color: white;
+    text-align: center;
+    opacity: 30%;
+  }
+
+  .link-signup{
+    color: #34D178;
+    text-decoration: none;
+    text-align: left;
+  }
+
+  .button{
+    height:50px;
+    width:235px;
+    background-color:#2ABB69;
+    border-color:#2ABB69;
+    color:#0B0B0B;
+    font-family: "Archivo Black", sans-serif;
+    font-weight: bold;
+    size: 14px;
+    border-radius: 8px;
+  }
+  </style>
+</head>
+
+<body class="background">
+
+<div class="login_title">
+  <h1>Login</h1>
+</div>
+
+<form id="login_form" class="login_form">
+  <div class="field">
+    <h5>Enter course content</h5>
+    <textarea name="paragraph_text" class="field" id="content-field" cols="50" rows="10"></textarea>
+  </div>
+
+  <br>
+
+  <div class="field">
+    <button type="submit" class="button" id="btn_submit">Post</button>
+  </div>
+  <br>
+  <br>
+</form>
+
+
+<div>
+  <h5 id="signup_link"> <a href="https://gameedu.herokuapp.com/newsfeed" class="link-signup"> Back to</a> newsfeed</h5>
+</div>
+</body>
+
+<script>
+  const url = "https://gameedu.herokuapp.com";
+  const form = document.getElementById("login_form");
+
+  // FetchService is service that is called for requests
+  class FetchService {
+    constructor() {
+
+    }
+    async performPostHttpRequest(fetchLink, headers, body) {
+      if (!fetchLink || !headers || !body) {
+        throw new Error("One or more POST request parameters was not passed.");
+      }
+      try {
+        const rawResponse = await fetch(fetchLink, {
+          mode: "no-cors",
+          method: "POST",
+          headers: headers,
+          body: JSON.stringify(body)
+        });
+        console.log(JSON.stringify(body))
+        return await rawResponse.json();
+      } catch (err) {
+        console.error(`Error at fetch POST: ${err}`);
+        throw err;
+      }
+    }
+  }
+
+  const fetchService = new FetchService();
+
+  async function submitForm(form) {
+    const btnSubmit = document.getElementById('btn_submit');
+    btnSubmit.disabled = true;
+    setTimeout(() => btnSubmit.disabled = false, 200);
+
+    //intializing values
+    const jsonFormData = buildJsonFormData(form);
+    const headers = buildHeaders(jsonFormData.length);
+
+    //making request
+    const response = await fetchService.performPostHttpRequest(url+"/api/post_content", headers, jsonFormData); // Uses JSON Placeholder
+
+    if (!response)
+      alert(`An error occured.`);
+
+    console.log(response);
+    if (JSON.stringify(response) === "{\"response\":\"Wrong Password!\"}")
+      document.getElementById("error").style.visibility = "visible"
+    else
+      window.location.replace(url+"/newsfeed");
+
+  }
+
+  //buildHeaders returns headers for request
+  function buildHeaders(contentLength) {
+    return {
+      "Host": "https://gameedu.herokuapp.com/post_content_page",
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Content-Length": contentLength
+    };
+  }
+
+  //buildJsonFromData is transforming html form to json type
+  function buildJsonFormData(form) {
+    const jsonFormData = {};
+    for (const pair of new FormData(form)) {
+      jsonFormData[pair[0]] = pair[1];
+    }
+    return jsonFormData;
+  }
+  form.addEventListener("submit", function(event) {
+    // stop form submission
+    event.preventDefault();
+    // validate the form is not empty
+    let usernameValid = form.elements["content-field"].value.trim() !== "";
+    //submiting and chaecking values
+    if (usernameValid) {
+      submitForm(form);
+    } else {
+      document.getElementById("error").style.visibility = "visible"
+    }
+  })
+</script>
+</html>

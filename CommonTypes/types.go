@@ -1,7 +1,6 @@
 package CommonTypes
 
 import (
-	"encoding/json"
 	"github.com/dgrijalva/jwt-go"
 )
 
@@ -31,7 +30,7 @@ type User struct {
 }
 
 type Content struct {
-	Request json.RawMessage `json:"request"`
+	Request string `json:"paragraph_text"`
 }
 
 type Course struct {
@@ -44,8 +43,17 @@ type Course struct {
 	Language    string `json:"language"`
 	PublishedAt string `json:"published_at"`
 	Title       string `json:"title"`
-	Url         string `json:"url"`
+	Content     string `json:"content"`
 	Views       int    `json:"views"`
+}
+
+type ResivedCourse struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Game        string `json:"game"`
+	Category    string `json:"category"`
+	Image       string `json:"image"`
+	Agree       string `json:"agree"`
 }
 
 type RequestWalletSignUpSend struct {

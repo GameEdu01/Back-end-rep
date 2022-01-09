@@ -6,7 +6,6 @@ import (
 	myerrors "eduapp/pkg/errors"
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
 	"github.com/julienschmidt/httprouter"
 	"html/template"
 	"io"
@@ -16,8 +15,8 @@ import (
 	"time"
 )
 
-//CoursePage is responsible for sending page with course content
-func CoursePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+//PageCourse is responsible for sending page with course content
+func PageCourse(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	b, err := io.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -26,7 +25,8 @@ func CoursePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	id, err := uuid.Parse(string(b))
+	id, _ := strconv.Atoi(string(b))
+	id = 13
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(`{"message":"` + `error parsing UUID` + `"}`))
@@ -34,8 +34,8 @@ func CoursePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 	content := db.GetCourseById(db.DbConnector(), id)
-
 	t, err := template.ParseFiles("./templates/Course.html")
+	fmt.Println(err)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
@@ -49,7 +49,6 @@ func CoursePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		myerrors.Handle500(w, r)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
 }
 
 func SendNewsFeed(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -129,8 +128,8 @@ func PostCourse(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	req := &Types.Course{}
-	err = json.Unmarshal(body, req)
+	resivedCourse := &Types.ResivedCourse{}
+	err = json.Unmarshal(body, resivedCourse)
 	if err != nil {
 		fmt.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -138,19 +137,62 @@ func PostCourse(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		myerrors.Handle400(w, r)
 		return
 	}
-
+	req := &Types.Course{}
+	req.Title = resivedCourse.Title
+	req.Description = resivedCourse.Description
+	req.Game = resivedCourse.Game
+	req.Category = resivedCourse.Category
+	req.Image = resivedCourse.Image
 	req.Language = "en"
 	req.PublishedAt = time.Now().String()
 	req.Views = 1
+
 	fmt.Printf("%+v\n", req)
 	db.PostCourse(db.DbConnector(), req)
-	return
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{"message":"` + `susses` + `"}`))
+}
+
+func PostContent(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		fmt.Println(fmt.Errorf("Error: %v", err))
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(`{"message":"` + `error parsing request` + `"}`))
+		myerrors.Handle400(w, r)
+		return
+	}
+	resivedContent := Types.Content{}
+	err = json.Unmarshal(body, &resivedContent)
+	fmt.Printf("%+v\n", resivedContent)
+	//ToDo: save content to db
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{"message":"` + `susses` + `"}`))
+
 }
 
 // PagePostCourse is responsible for getting and saving data about new posts
 func PagePostCourse(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	HomePageVars := Types.PageVariables{}
 	t, err := template.ParseFiles("./templates/PostCourse.html")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		myerrors.Handle500(w, r)
+		return
+	}
+	err = t.Execute(w, HomePageVars)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		myerrors.Handle500(w, r)
+		return
+	}
+}
+
+func PagePostContent(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	HomePageVars := Types.PageVariables{}
+	t, err := template.ParseFiles("./templates/CreateContent.html")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))

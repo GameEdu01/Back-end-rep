@@ -169,7 +169,6 @@
 
   <br>
 
-  <br>
 
   <div class="field">
     <input type="checkbox" name="agree" id="agreement-field" value="yes agree"/>
@@ -183,7 +182,7 @@
   </div>
 
   <div class="field">
-    <button type="submit" class="button" id="btn_submit">Verify</button>
+    <button type="submit" class="button" id="btn_submit">Continiue</button>
   </div>
 
   <br>
@@ -196,7 +195,7 @@
 </body>
 
 <script>
-  const url = "http://localhost:8080";
+  const url = "https://gameedu.herokuapp.com";
   const form = document.getElementById("login_form");
 
   // FetchService is service that is called for requests
@@ -246,15 +245,13 @@
     if (JSON.stringify(response) === "{\"response\":\"Wrong Password!\"}")
       document.getElementById("error").style.visibility = "visible"
 
-    console.log(JSON.stringify((response)))
-
-    window.location.replace(url+"/newsfeed");
+    window.location.replace(url+"/post_content_page");
   }
 
   //buildHeaders returns headers for request
   function buildHeaders(contentLength) {
     return {
-      "Host": "https://localhost:8080/post_course",
+      "Host": "https://gameedu.herokuapp.com/post_course",
       "Accept": "application/json",
       "Content-Type": "application/json",
       "Content-Length": contentLength

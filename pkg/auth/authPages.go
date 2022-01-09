@@ -3,7 +3,6 @@ package auth
 import (
 	Types "eduapp/CommonTypes"
 	myerrors "eduapp/pkg/errors"
-	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"html/template"
 	"net/http"
@@ -85,10 +84,6 @@ func LoginUserPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
 			return
-		} else {
-			username := r.Form["username"]
-			password := r.Form["password"]
-			fmt.Fprintf(w, "username = %s, password = %s", username, password)
 		}
 	}
 }
