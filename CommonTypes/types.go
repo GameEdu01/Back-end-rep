@@ -45,6 +45,7 @@ type Course struct {
 	PublishedAt string `json:"published_at"`
 	Title       string `json:"title"`
 	Url         string `json:"url"`
+	Views       int    `json:"views"`
 }
 
 type RequestWalletSignUpSend struct {

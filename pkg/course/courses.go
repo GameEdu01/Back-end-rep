@@ -13,6 +13,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 //CoursePage is responsible for sending page with course content
@@ -117,8 +118,8 @@ func UserCoursesPage(w http.ResponseWriter, r *http.Request, ps httprouter.Param
 	}
 }
 
-//CoursePost is responsible for getting and saving data about new posts
-func CoursePost(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+//PostCourse is responsible for getting and saving data about new posts
+func PostCourse(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		fmt.Println(fmt.Errorf("Error: %v", err))
@@ -137,12 +138,30 @@ func CoursePost(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		myerrors.Handle400(w, r)
 		return
 	}
+
+	req.Language = "en"
+	req.PublishedAt = time.Now().String()
+	req.Views = 1
 	fmt.Printf("%+v\n", req)
 	db.PostCourse(db.DbConnector(), req)
 	return
 }
 
-//UserCoursesPost is responsible for getting and saving updates about users courses
-func UserCoursesPost(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	//ToDo
+// PagePostCourse is responsible for getting and saving data about new posts
+func PagePostCourse(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	HomePageVars := Types.PageVariables{}
+	t, err := template.ParseFiles("./templates/PostCourse.html")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		myerrors.Handle500(w, r)
+		return
+	}
+	err = t.Execute(w, HomePageVars)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+		myerrors.Handle500(w, r)
+		return
+	}
 }

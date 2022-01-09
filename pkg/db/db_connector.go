@@ -89,7 +89,7 @@ func GetNewsFeed(db *sql.DB, ammount int) []Types.Course {
 			&course.Category, &course.Game,
 			&course.Description, &course.Image,
 			&course.Language, &course.PublishedAt,
-			&course.Title, &course.Url,
+			&course.Title, &course.Url, &course.Views,
 		); err != nil {
 			log.Fatalf("could not scan row: %v", err)
 		}
@@ -137,8 +137,9 @@ func PostCourse(db *sql.DB, CoursePosted *Types.Course) {
 	SaveCourse.PublishedAt = CoursePosted.PublishedAt
 	SaveCourse.Title = CoursePosted.Title
 	SaveCourse.Url = CoursePosted.Url
+	SaveCourse.Views = CoursePosted.Views
 
-	result, err := db.Exec("INSERT INTO courses (author_id, category_game, game, description, image, language_content, published_at, title, url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)", SaveCourse.Author_id, SaveCourse.Category, SaveCourse.Game, SaveCourse.Description, SaveCourse.Image, SaveCourse.Language, SaveCourse.PublishedAt, SaveCourse.Title, SaveCourse.Url)
+	result, err := db.Exec("INSERT INTO courses (author_id, category_game, game, description, image, language_content, published_at, title, url, views) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)", SaveCourse.Author_id, SaveCourse.Category, SaveCourse.Game, SaveCourse.Description, SaveCourse.Image, SaveCourse.Language, SaveCourse.PublishedAt, SaveCourse.Title, SaveCourse.Url, SaveCourse.Views)
 	if err != nil {
 		fmt.Errorf("Error: %v", err)
 	}
