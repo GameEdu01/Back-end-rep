@@ -244,8 +244,7 @@
 
     if (JSON.stringify(response) === "{\"response\":\"Wrong Password!\"}")
       document.getElementById("error").style.visibility = "visible"
-      setCookie("id", response)
-      console.log(response)
+    setCookie("id", response)
   }
 
   function setCookie(cname, cvalue) {

@@ -151,7 +151,8 @@ func PostCourse(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	id := db.PostCourse(db.DbConnector(), req)
 	fmt.Printf("%+v\n", id)
-	w.Write([]byte(`{"id":"` + strconv.Itoa(0) + `"}`))
+	//Todo Get ID
+	w.Write([]byte(strconv.Itoa(53)))
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -164,10 +165,19 @@ func PostContent(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		myerrors.Handle400(w, r)
 		return
 	}
+	cookie, err := r.Cookie("id")
+	if err != nil {
+		return
+	}
+	fmt.Println(cookie)
 	resivedContent := Types.Content{}
 	err = json.Unmarshal(body, &resivedContent)
 	fmt.Printf("%+v\n", resivedContent)
-	//ToDo: save content to db
+	id, err := strconv.Atoi(cookie.Value)
+	if err != nil {
+		return
+	}
+	db.PostContent(db.DbConnector(), id, resivedContent.Request)
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(`{"message":"` + `susses` + `"}`))
 

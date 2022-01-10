@@ -148,18 +148,19 @@ func PostCourse(db *sql.DB, CoursePosted *Types.Course) int64 {
 	if err != nil {
 		fmt.Errorf("Error: %v", err)
 	}
-	if err != nil {
-		fmt.Errorf("Error: %v", err)
-	}
 	return id
 }
 
 func PostContent(db *sql.DB, id int, content string) {
-	result, err := db.Exec("UPDATE courses SET content = $1 WHERE id = $2 VALUES ($1, $2)", content, id)
+	sqlStatement := `
+UPDATE courses
+SET content = $2
+WHERE id = $1;`
+
+	err := db.QueryRow(sqlStatement, id, content)
 	if err != nil {
 		fmt.Errorf("Error: %v", err)
 	}
-	fmt.Println(result)
 }
 
 func GetMarketForUser(db *sql.DB, id int) []Types.Course {
