@@ -127,7 +127,7 @@ func GetCourseForUser(db *sql.DB, id int) []Types.Course {
 	return courses
 }
 
-func PostCourse(db *sql.DB, CoursePosted *Types.Course) {
+func PostCourse(db *sql.DB, CoursePosted *Types.Course) int64 {
 	var SaveCourse Types.Course
 	SaveCourse.Author_id = CoursePosted.Author_id
 	SaveCourse.Category = CoursePosted.Category
@@ -148,7 +148,18 @@ func PostCourse(db *sql.DB, CoursePosted *Types.Course) {
 	if err != nil {
 		fmt.Errorf("Error: %v", err)
 	}
-	fmt.Println(id)
+	if err != nil {
+		fmt.Errorf("Error: %v", err)
+	}
+	return id
+}
+
+func PostContent(db *sql.DB, id int, content string) {
+	result, err := db.Exec("UPDATE courses SET content = $1 WHERE id = $2 VALUES ($1, $2)", content, id)
+	if err != nil {
+		fmt.Errorf("Error: %v", err)
+	}
+	fmt.Println(result)
 }
 
 func GetMarketForUser(db *sql.DB, id int) []Types.Course {

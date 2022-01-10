@@ -148,9 +148,11 @@ func PostCourse(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	req.Views = 1
 
 	fmt.Printf("%+v\n", req)
-	db.PostCourse(db.DbConnector(), req)
+
+	id := db.PostCourse(db.DbConnector(), req)
+	fmt.Printf("%+v\n", id)
+	w.Write([]byte(`{"id":"` + strconv.Itoa(0) + `"}`))
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"message":"` + `susses` + `"}`))
 }
 
 func PostContent(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {

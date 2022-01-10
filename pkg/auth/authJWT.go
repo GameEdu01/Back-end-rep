@@ -52,8 +52,7 @@ func UserSignup(response http.ResponseWriter, request *http.Request, _ httproute
 
 	dbUser, err := db2.GetLogin(user.Username)
 	if err != nil {
-		response.WriteHeader(http.StatusInternalServerError)
-		response.Write([]byte(`{"message":"` + err.Error() + `"}`))
+		response.Write([]byte(`{"response":"` + err.Error() + `"}`))
 		myerrors.Handle500(response, request)
 		return
 	}
@@ -62,7 +61,35 @@ func UserSignup(response http.ResponseWriter, request *http.Request, _ httproute
 		return
 	}
 	db2.CreateUserInDB(user.Username, user.Password)
-	response.Write([]byte((`{"message":"` + `succesfully created user` + `"}"`)))
+
+	// Declare the expiration time of the token
+	// here, we have kept it as 60 minutes
+	expirationTime := time.Now().Add(60 * time.Minute)
+	// Create the JWT claims, which includes the username and expiry time
+	var creds Types.Credentials
+	claims := &Types.Claims{
+		Username: creds.Username,
+		StandardClaims: jwt.StandardClaims{
+			// In JWT, the expiry time is expressed as unix milliseconds
+			ExpiresAt: expirationTime.Unix(),
+		},
+	}
+
+	// Declare the token with the algorithm used for signing, and the claims
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	// Create the JWT string
+	tokenString, err := token.SignedString(jwtKey)
+	if err != nil {
+		// If there is an error in creating the JWT return an internal server error
+		response.WriteHeader(http.StatusInternalServerError)
+		myerrors.Handle500(response, request)
+		return
+	}
+
+	response.WriteHeader(http.StatusOK)
+	response.Write([]byte(`{"authToken":"` + tokenString + `"}`))
+	fmt.Println(tokenString)
+	return
 }
 
 func UserLogin(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {

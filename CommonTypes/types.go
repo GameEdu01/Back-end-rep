@@ -7,6 +7,7 @@ import (
 type UserAuth struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
+	Agree    string `json:"agree"`
 }
 
 type AccessDetails struct {
