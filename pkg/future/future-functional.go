@@ -1,10 +1,14 @@
 package future
 
 import (
+	"database/sql"
+	Types "eduapp/CommonTypes"
 	"eduapp/pkg/db"
+	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"html/template"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -30,7 +34,7 @@ func MarketPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		w.Write([]byte(`{"message":"` + `error parsing UUID` + `"}`))
 		return
 	}
-	content := db.GetMarketForUser(db.DbConnector(), id)
+	content := GetMarketForUser(db.DbConnector(), id)
 	err = t.Execute(w, content)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -39,7 +43,7 @@ func MarketPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 }
 
-//Leaderboard Todo
+//Leaderboard
 //Future functional
 func Leaderboard(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	if r.Method == "GET" {
@@ -56,4 +60,33 @@ func Leaderboard(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 			return
 		}
 	}
+}
+
+func GetMarketForUser(db *sql.DB, id int) []Types.Course {
+	rows, err := db.Query("SELECT * FROM courses")
+	if err != nil {
+		log.Fatalf("could not execute query: %v", err)
+	}
+
+	var courses []Types.Course
+
+	for rows.Next() {
+		course := Types.Course{}
+		if err := rows.Scan(
+			&course.Id, &course.Author_id,
+			&course.Category, &course.Game,
+			&course.Description, &course.Image,
+			&course.Language, &course.PublishedAt,
+			&course.Title, &course.Content,
+		); err != nil {
+			log.Fatalf("could not scan row: %v", err)
+		}
+
+		fmt.Println(id)
+
+		//selecting courses for user
+
+	}
+	fmt.Print(courses)
+	return courses
 }

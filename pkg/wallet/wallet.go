@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"html/template"
+	"io"
 	"io/ioutil"
 	"net/http"
 )
@@ -48,6 +49,10 @@ func CreateWallet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 		return
 	}
 
+	//Todo request with register to /api/signup
+	//ToDo create session /api/new_session
+	//ToDo get session /api/get_session
+	//ToDo send request for wallet registration
 	reqSend, err := http.NewRequest("POST", "https://gameedu-api.herokuapp.com/api/wallet_signup", payloadBuf)
 
 	if err != nil {
@@ -74,6 +79,8 @@ func CreateWallet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 		myerrors.Handle400(w, r)
 	}
 
+	msg, err := (io.ReadAll(res.Body))
+	fmt.Println(string(msg))
 	w.WriteHeader(http.StatusOK)
 	w.Write(resByte)
 }

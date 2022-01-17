@@ -1,11 +1,13 @@
 package db
 
 import (
+	"context"
 	"database/sql"
 	Types "eduapp/CommonTypes"
 	"fmt"
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"log"
+	"time"
 )
 
 func DbConnector() *sql.DB {
@@ -128,27 +130,35 @@ func GetCourseForUser(db *sql.DB, id int) []Types.Course {
 }
 
 func PostCourse(db *sql.DB, CoursePosted *Types.Course) int64 {
-	var SaveCourse Types.Course
-	SaveCourse.Author_id = CoursePosted.Author_id
-	SaveCourse.Category = CoursePosted.Category
-	SaveCourse.Game = CoursePosted.Game
-	SaveCourse.Description = CoursePosted.Description
-	SaveCourse.Image = CoursePosted.Image
-	SaveCourse.Language = CoursePosted.Language
-	SaveCourse.PublishedAt = CoursePosted.PublishedAt
-	SaveCourse.Title = CoursePosted.Title
-	SaveCourse.Content = CoursePosted.Content
-	SaveCourse.Views = CoursePosted.Views
+	query := "INSERT INTO courses (author_id, category_game, game, description, image, language_content, published_at, title, content, views) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+	ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancelfunc()
+	stmt, err := db.PrepareContext(ctx, query)
+	if err != nil {
+		log.Printf("Error %s when preparing SQL statement", err)
+		return 0
+	}
+	defer stmt.Close()
+	res, err := stmt.ExecContext(ctx, CoursePosted.Author_id, CoursePosted.Category, CoursePosted.Game, CoursePosted.Description, CoursePosted.Image, CoursePosted.Language, CoursePosted.PublishedAt, CoursePosted.Title, CoursePosted.Content, CoursePosted.Views)
+	if err != nil {
+		log.Printf("Error %s when inserting row into products table", err)
+		return 0
+	}
+	rows, err := res.RowsAffected()
+	if err != nil {
+		log.Printf("Error %s when finding rows affected", err)
+		return 0
+	}
+	log.Printf("%d products created ", rows)
 
-	result, err := db.Exec("INSERT INTO courses (author_id, category_game, game, description, image, language_content, published_at, title, content, views) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)", SaveCourse.Author_id, SaveCourse.Category, SaveCourse.Game, SaveCourse.Description, SaveCourse.Image, SaveCourse.Language, SaveCourse.PublishedAt, SaveCourse.Title, SaveCourse.Content, SaveCourse.Views)
+	courseId, err := res.LastInsertId()
 	if err != nil {
-		fmt.Errorf("Error: %v", err)
+		log.Printf("Error %s when getting last inserted product", err)
+		return 0
 	}
-	id, err := result.LastInsertId()
-	if err != nil {
-		fmt.Errorf("Error: %v", err)
-	}
-	return id
+	log.Printf("Product with ID %d created", courseId)
+	return courseId
+
 }
 
 func PostContent(db *sql.DB, id int, content string) {
@@ -161,33 +171,4 @@ WHERE id = $1;`
 	if err != nil {
 		fmt.Errorf("Error: %v", err)
 	}
-}
-
-func GetMarketForUser(db *sql.DB, id int) []Types.Course {
-	rows, err := db.Query("SELECT * FROM courses")
-	if err != nil {
-		log.Fatalf("could not execute query: %v", err)
-	}
-
-	var courses []Types.Course
-
-	for rows.Next() {
-		course := Types.Course{}
-		if err := rows.Scan(
-			&course.Id, &course.Author_id,
-			&course.Category, &course.Game,
-			&course.Description, &course.Image,
-			&course.Language, &course.PublishedAt,
-			&course.Title, &course.Content,
-		); err != nil {
-			log.Fatalf("could not scan row: %v", err)
-		}
-
-		fmt.Println(id)
-
-		//ToDo selecting courses for user
-
-	}
-	fmt.Print(courses)
-	return courses
 }
