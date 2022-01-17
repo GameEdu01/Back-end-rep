@@ -96,3 +96,14 @@ type Claims struct {
 	Username string `json:"username"`
 	jwt.StandardClaims
 }
+
+type ExternalRegistration struct {
+	Username     string `json:"username"`
+	PasswordHash string `json:"passwordHash"`
+	Email        string `json:"email"`
+}
+
+type ExternalResponse struct {
+	Message string `json:"message"`
+	Token   string `json:"token"`
+}

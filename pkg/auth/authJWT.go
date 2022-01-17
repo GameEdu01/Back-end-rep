@@ -17,7 +17,7 @@ import (
 // Create the JWT key used to create the signature
 var jwtKey = []byte("my_secret_key")
 
-func getHash(pwd []byte) string {
+func GetHash(pwd []byte) string {
 	hash, err := bcrypt.GenerateFromPassword(pwd, bcrypt.MinCost)
 	if err != nil {
 		log.Println(err)
@@ -46,7 +46,7 @@ func UserSignup(response http.ResponseWriter, request *http.Request, _ httproute
 	var user Types.UserAuth
 	var dbUser Types.User
 	json.NewDecoder(request.Body).Decode(&user)
-	user.Password = getHash([]byte(user.Password))
+	user.Password = GetHash([]byte(user.Password))
 
 	fmt.Println(user.Password, user.Username)
 

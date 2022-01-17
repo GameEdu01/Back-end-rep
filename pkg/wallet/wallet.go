@@ -3,12 +3,13 @@ package wallet
 import (
 	"bytes"
 	Types "eduapp/CommonTypes"
+	"eduapp/pkg/auth"
 	myerrors "eduapp/pkg/errors"
 	"encoding/json"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"html/template"
-	"io"
+	_ "io"
 	"io/ioutil"
 	"net/http"
 )
@@ -48,8 +49,21 @@ func CreateWallet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 		myerrors.Handle400(w, r)
 		return
 	}
-
-	//Todo request with register to /api/signup
+	resp, err := signUpForExternal(Payload.Name, Payload.Password, Payload.Email)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(`{"message":"` + `error parsing to json to external request` + `"}`))
+		myerrors.Handle400(w, r)
+		return
+	}
+	var responseFromApi Types.ExternalResponse
+	err = json.Unmarshal(resp, &responseFromApi)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(`{"message":"` + `error parsing to json to external request` + `"}`))
+		myerrors.Handle400(w, r)
+		return
+	}
 	//ToDo create session /api/new_session
 	//ToDo get session /api/get_session
 	//ToDo send request for wallet registration
@@ -78,11 +92,33 @@ func CreateWallet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 		w.Write([]byte(`{"message":"` + `error parsing response` + `"}`))
 		myerrors.Handle400(w, r)
 	}
-
-	msg, err := (io.ReadAll(res.Body))
-	fmt.Println(string(msg))
 	w.WriteHeader(http.StatusOK)
 	w.Write(resByte)
+}
+
+func signUpForExternal(name string, password string, email string) ([]byte, error) {
+	password = auth.GetHash([]byte(password))
+	var payload Types.ExternalRegistration
+	payload.Username = name
+	payload.PasswordHash = password
+	payload.Email = email
+
+	payloadBuf := new(bytes.Buffer)
+	err := json.NewEncoder(payloadBuf).Encode(payload)
+	if err != nil {
+		return nil, err
+	}
+	reqSend, err := http.NewRequest("POST", "https://gameedu-api.herokuapp.com/api/wallet_signup", payloadBuf)
+
+	client := &http.Client{}
+	res, err := client.Do(reqSend)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	resByte, err := ioutil.ReadAll(res.Body)
+	return resByte, nil
 }
 
 func WalletVerifyPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
