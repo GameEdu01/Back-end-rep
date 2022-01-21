@@ -15,7 +15,7 @@ import (
 )
 
 // Create the JWT key used to create the signature
-var jwtKey = []byte("my_secret_key")
+var JwtKey = []byte("my_secret_key")
 
 func GetHash(pwd []byte) string {
 	hash, err := bcrypt.GenerateFromPassword(pwd, bcrypt.MinCost)
@@ -68,7 +68,7 @@ func UserSignup(response http.ResponseWriter, request *http.Request, _ httproute
 	// Create the JWT claims, which includes the username and expiry time
 	var creds Types.Credentials
 	claims := &Types.Claims{
-		Username: creds.Username,
+		Content: creds.Username,
 		StandardClaims: jwt.StandardClaims{
 			// In JWT, the expiry time is expressed as unix milliseconds
 			ExpiresAt: expirationTime.Unix(),
@@ -78,7 +78,7 @@ func UserSignup(response http.ResponseWriter, request *http.Request, _ httproute
 	// Declare the token with the algorithm used for signing, and the claims
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	// Create the JWT string
-	tokenString, err := token.SignedString(jwtKey)
+	tokenString, err := token.SignedString(JwtKey)
 	if err != nil {
 		// If there is an error in creating the JWT return an internal server error
 		response.WriteHeader(http.StatusInternalServerError)
@@ -123,7 +123,7 @@ func UserLogin(response http.ResponseWriter, request *http.Request, _ httprouter
 	// Create the JWT claims, which includes the username and expiry time
 	var creds Types.Credentials
 	claims := &Types.Claims{
-		Username: creds.Username,
+		Content: creds.Username,
 		StandardClaims: jwt.StandardClaims{
 			// In JWT, the expiry time is expressed as unix milliseconds
 			ExpiresAt: expirationTime.Unix(),
@@ -133,7 +133,7 @@ func UserLogin(response http.ResponseWriter, request *http.Request, _ httprouter
 	// Declare the token with the algorithm used for signing, and the claims
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	// Create the JWT string
-	tokenString, err := token.SignedString(jwtKey)
+	tokenString, err := token.SignedString(JwtKey)
 	if err != nil {
 		// If there is an error in creating the JWT return an internal server error
 		response.WriteHeader(http.StatusInternalServerError)
