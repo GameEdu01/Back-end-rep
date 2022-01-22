@@ -529,7 +529,7 @@
 
       console.log(response);
       if (JSON.stringify(response) === "{\"response\":\"Wrong Password!\"}")
-        customAlert.alert('Error trying to register.', 'Please try again later')
+        customAlert.alert('Wrong password or trying to login to not existing account.', 'Error while login')
       else
         setCookie("authToken", response["authToken"])
     }
