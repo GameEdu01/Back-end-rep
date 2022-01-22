@@ -15,8 +15,7 @@ func InitRouter(router *httprouter.Router, pathName string) {
 
 	//GET routers
 	routerWrap.GET("/", auth.ForwardToNewsFeed)
-	routerWrap.GET("/register", auth.RegisterUserPage)
-	routerWrap.GET("/login", auth.LoginUserPage)
+	routerWrap.GET("/auth", auth.SignAndLogin)
 	routerWrap.GET("/tac", auth.TermsAndConditions)
 	routerWrap.GET("/tac_for_wallet", auth.TermsAndConditionsForWallet)
 	routerWrap.GET("/newsfeed", middleware.AuthMiddleware(course.NewsFeedPage))

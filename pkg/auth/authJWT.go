@@ -43,24 +43,24 @@ func GetIdByLogin(username string) (int, error) {
 
 func UserSignup(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 	response.Header().Set("Content-Type", "application/json")
-	var user Types.UserAuth
+	var user Types.UserRegister
 	var dbUser Types.User
 	json.NewDecoder(request.Body).Decode(&user)
 	user.Password = GetHash([]byte(user.Password))
 
-	fmt.Println(user.Password, user.Username)
+	fmt.Println(user.Password, user.Email)
 
-	dbUser, err := db2.GetLogin(user.Username)
+	dbUser, err := db2.GetLogin(user.Email)
 	if err != nil {
 		response.Write([]byte(`{"response":"` + err.Error() + `"}`))
 		myerrors.Handle500(response, request)
 		return
 	}
-	if dbUser.Username == user.Username {
+	if dbUser.Username == user.Email {
 		response.Write([]byte(`{"response":"Trying to create existing user!"}`))
 		return
 	}
-	db2.CreateUserInDB(user.Username, user.Password)
+	db2.CreateUserInDB(user.Username, user.Password, user.Email)
 
 	// Declare the expiration time of the token
 	// here, we have kept it as 60 minutes
@@ -94,11 +94,12 @@ func UserSignup(response http.ResponseWriter, request *http.Request, _ httproute
 
 func UserLogin(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 	response.Header().Set("Content-Type", "application/json")
-	var user Types.UserAuth
+	var user Types.UserLogin
 	var dbUser Types.User
+	fmt.Println(request.Body)
 	json.NewDecoder(request.Body).Decode(&user)
 
-	dbUser, err := db2.GetLogin(user.Username)
+	dbUser, err := db2.GetLogin(user.Email)
 
 	if err != nil {
 		response.WriteHeader(http.StatusInternalServerError)

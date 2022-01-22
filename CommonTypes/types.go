@@ -4,10 +4,15 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-type UserAuth struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Agree    string `json:"agree"`
+type UserLogin struct {
+	Email    string `json:"Email"`
+	Password string `json:"Password"`
+}
+
+type UserRegister struct {
+	Username string `json:"Username"`
+	Email    string `json:"Email"`
+	Password string `json:"Password"`
 }
 
 type AccessDetails struct {
@@ -28,6 +33,7 @@ type User struct {
 	Id       string `json:"id"`
 	Username string `json:"username"`
 	Password string `json:"password"`
+	Email    string `json:"email"`
 }
 
 type Content struct {

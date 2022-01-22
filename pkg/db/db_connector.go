@@ -24,16 +24,16 @@ func DbConnector() *sql.DB {
 	return db
 }
 
-func GetLogin(username string) (Types.User, error) {
+func GetLogin(email string) (Types.User, error) {
 	db := DbConnector()
-	rows, err := db.Query("SELECT * FROM logins WHERE username=$1", username)
+	rows, err := db.Query("SELECT * FROM logins WHERE email=$1", email)
 	if err != nil {
 		return Types.User{}, err
 	}
 	var users Types.User
 
 	for rows.Next() {
-		if err := rows.Scan(&users.Id, &users.Username, &users.Password); err != nil {
+		if err := rows.Scan(&users.Id, &users.Username, &users.Password, &users.Email); err != nil {
 			log.Fatalf("could not scan row: %v", err)
 		}
 
@@ -44,9 +44,9 @@ func GetLogin(username string) (Types.User, error) {
 
 }
 
-func CreateUserInDB(username string, password string) {
+func CreateUserInDB(username string, password string, email string) {
 	db := DbConnector()
-	result, err := db.Exec("INSERT INTO logins (username, password) VALUES ($1, $2)", username, password)
+	result, err := db.Exec("INSERT INTO logins (username, passwordu, email) VALUES ($1, $2, $3)", username, password, email)
 	if err != nil {
 		fmt.Errorf("Error: %v", err)
 	}
