@@ -1,13 +1,11 @@
 package db
 
 import (
-	"context"
 	"database/sql"
 	Types "eduapp/CommonTypes"
 	"fmt"
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"log"
-	"time"
 )
 
 func DbConnector() *sql.DB {
@@ -129,36 +127,17 @@ func GetCourseForUser(db *sql.DB, id int) []Types.Course {
 	return courses
 }
 
-func PostCourse(db *sql.DB, CoursePosted *Types.Course) int64 {
-	query := "INSERT INTO courses (author_id, category_game, game, description, image, language_content, published_at, title, content, views) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
-	ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancelfunc()
-	stmt, err := db.PrepareContext(ctx, query)
+func PostCourse(db *sql.DB, CoursePosted *Types.Course) int {
+	var id int
+	err := db.QueryRow("INSERT INTO courses (author_id, category_game, game, description, image, language_content, published_at, title, content, views) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id", CoursePosted.Author_id, CoursePosted.Category, CoursePosted.Game, CoursePosted.Description, CoursePosted.Image, CoursePosted.Language, CoursePosted.PublishedAt, CoursePosted.Title, CoursePosted.Content, CoursePosted.Views).Scan(&id)
 	if err != nil {
 		log.Printf("Error %s when preparing SQL statement", err)
 		return 0
 	}
-	defer stmt.Close()
-	res, err := stmt.ExecContext(ctx, CoursePosted.Author_id, CoursePosted.Category, CoursePosted.Game, CoursePosted.Description, CoursePosted.Image, CoursePosted.Language, CoursePosted.PublishedAt, CoursePosted.Title, CoursePosted.Content, CoursePosted.Views)
-	if err != nil {
-		log.Printf("Error %s when inserting row into products table", err)
-		return 0
-	}
-	rows, err := res.RowsAffected()
-	if err != nil {
-		log.Printf("Error %s when finding rows affected", err)
-		return 0
-	}
-	log.Printf("%d products created ", rows)
+	log.Printf("course created")
 
-	courseId, err := res.LastInsertId()
-	if err != nil {
-		log.Printf("Error %s when getting last inserted product", err)
-		return 0
-	}
-	log.Printf("Product with ID %d created", courseId)
-	return courseId
-
+	log.Printf("Product with ID %d created", id)
+	return id
 }
 
 func PostContent(db *sql.DB, id int, content string) {

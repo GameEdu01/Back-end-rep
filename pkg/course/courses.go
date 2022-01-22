@@ -152,7 +152,7 @@ func PostCourse(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	id := db.PostCourse(db.DbConnector(), req)
 	fmt.Printf("%+v\n", id)
 	//Todo Get ID
-	w.Write([]byte(strconv.Itoa(int(id))))
+	w.Write([]byte(strconv.Itoa(id)))
 }
 
 func PostContent(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {

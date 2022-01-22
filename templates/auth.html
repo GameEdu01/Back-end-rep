@@ -261,7 +261,7 @@
     text-align: center;
     border: none;
     background-color: #0DDB84;
-    color: #aaaaaa;
+    color: #000000;
     box-shadow: 0 8px 24px 0 rgba(255,235,167,.2);
   }
   .btn:active,
@@ -483,6 +483,11 @@
     padding:10px;
     text-align:right;
   }
+
+
+
+
+
   </style>
   <script>
     const url = "https://gameedu.herokuapp.com";
@@ -603,7 +608,7 @@
     //buildHeaders returns headers for request
     function buildHeaders(contentLength) {
       return {
-        "Host": "https://gameedu.herokuapp.com/auth",
+        "Host": "http://localhost:8080/auth",
         "Accept": "application/json",
         "Content-Type": "application/json",
         "Content-Length": contentLength
@@ -712,7 +717,7 @@
                       <input type="password" name="logpass" class="form-style" placeholder="Your Password" id="signpass" autocomplete="off">
                       <i class="input-icon uil uil-lock-alt"></i>
                     </div>
-                    <a href="javascript:submitSignup()" class="btn mt-4">submit</a>
+                      <a href="javascript:submitSignup()" class="btn mt-4">submit</a>
                     </form>
                   </div>
                 </div>
