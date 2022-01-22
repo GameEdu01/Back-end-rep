@@ -529,7 +529,7 @@
 
       console.log(response);
       if (JSON.stringify(response) === "{\"response\":\"Wrong Password!\"}")
-        document.getElementById("error").style.visibility = "visible"
+        customAlert.alert('Error trying to register.', 'Please try again later')
       else
         setCookie("authToken", response["authToken"])
     }
