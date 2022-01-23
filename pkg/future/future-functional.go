@@ -62,6 +62,22 @@ func Leaderboard(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 }
 
+func NewMain(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	if r.Method == "GET" {
+		t, err := template.ParseFiles("./templates/profileRedesign.html")
+		if err != nil { // if there is an error
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+			return
+		}
+		err = t.Execute(w, nil)
+		if err != nil { // if there is an error
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
+			return
+		}
+	}
+}
 func GetMarketForUser(db *sql.DB, id int) []Types.Course {
 	rows, err := db.Query("SELECT * FROM courses")
 	if err != nil {

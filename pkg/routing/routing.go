@@ -25,6 +25,8 @@ func InitRouter(router *httprouter.Router, pathName string) {
 	routerWrap.GET("/post_course", middleware.AuthMiddleware(course.PagePostCourse))
 	routerWrap.GET("/post_content_page", middleware.AuthMiddleware(course.PagePostContent))
 
+	routerWrap.GET("/mainPageRedesgn", future.NewMain)
+
 	//POST routers
 	routerWrap.POST(pathName+"/api/user/login", auth.UserLogin)
 	routerWrap.POST(pathName+"/api/user/signup", auth.UserSignup)
