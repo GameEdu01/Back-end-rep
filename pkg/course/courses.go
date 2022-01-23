@@ -26,7 +26,7 @@ func PageCourse(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 
 	id, _ := strconv.Atoi(string(b))
-	id = 13
+	id = 4
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(`{"message":"` + `error parsing UUID` + `"}`))
