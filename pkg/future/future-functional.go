@@ -70,7 +70,25 @@ func NewMain(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 			w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
 			return
 		}
-		err = t.Execute(w, nil)
+
+		data := map[string]interface{}{
+			"Username":   "Darth Vader",
+			"Occupation": "Supreme Commander",
+			"At":         "Imperial Forces",
+			"LiveIn":     "Death Star",
+			"PlayerName": "DarthVader01",
+
+			//Content list should be here
+			"ContentType":  "album",
+			"ContentTitle": "Check out my new Death Star.",
+			"LongAgo":      "6 hours",
+			"Likes":        "13",
+			"Coments":      "20",
+			"Shares":       "13",
+			//ToDo images
+
+		}
+		err = t.Execute(w, data)
 		if err != nil { // if there is an error
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(`{"message":"` + `template parsing error` + `"}`))
