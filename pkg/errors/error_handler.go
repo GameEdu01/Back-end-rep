@@ -2,11 +2,12 @@ package errors
 
 import (
 	Types "eduapp/CommonTypes"
+	"github.com/julienschmidt/httprouter"
 	"html/template"
 	"net/http"
 )
 
-func Handle404(w http.ResponseWriter, r *http.Request) {
+func Handle404(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	HomePageVars := Types.PageVariables{}
 	t, err := template.ParseFiles("./templates/errors/error404.html")
 	if err != nil { // if there is an error

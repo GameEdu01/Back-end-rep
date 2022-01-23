@@ -24,6 +24,10 @@ func main() {
 	router := httprouter.New()
 	router.GET("/about", aboutSCPR)
 
+	router.NotFound = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "templates/errors/error404.html")
+	})
+
 	fmt.Println("hello i am started")
 	routing.InitRouter(router, urlPath)
 
